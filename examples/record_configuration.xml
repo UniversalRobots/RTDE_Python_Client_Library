@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<rtde_config>
+	<recipe key="out">
+		<field name="timestamp" type="DOUBLE"/>
+		<field name="target_q" type="VECTOR6D"/>
+		<field name="target_qd" type="VECTOR6D"/>
+		<field name="target_qdd" type="VECTOR6D"/>
+		<field name="target_current" type="VECTOR6D"/>
+		<field name="target_moment" type="VECTOR6D"/>
+		<field name="actual_q" type="VECTOR6D"/>
+		<field name="actual_qd" type="VECTOR6D"/>
+		<field name="actual_current" type="VECTOR6D"/>
+		<field name="joint_control_output" type="VECTOR6D"/>
+		<field name="actual_TCP_pose" type="VECTOR6D"/>
+		<field name="actual_TCP_speed" type="VECTOR6D"/>
+		<field name="actual_TCP_force" type="VECTOR6D"/>
+		<field name="target_TCP_pose" type="VECTOR6D"/>
+		<field name="target_TCP_speed" type="VECTOR6D"/>
+		<field name="actual_digital_input_bits" type="UINT64"/>
+		<field name="joint_temperatures" type="VECTOR6D"/>
+		<field name="actual_execution_time" type="DOUBLE"/>
+		<field name="robot_mode" type="INT32"/>
+		<field name="joint_mode" type="VECTOR6INT32"/>
+		<field name="safety_mode" type="INT32"/>
+		<field name="actual_tool_accelerometer" type="VECTOR3D"/>
+		<field name="speed_scaling" type="DOUBLE"/>
+		<field name="target_speed_fraction" type="DOUBLE"/>
+		<field name="actual_momentum" type="DOUBLE"/>
+		<field name="actual_main_voltage" type="DOUBLE"/>
+		<field name="actual_robot_voltage" type="DOUBLE"/>
+		<field name="actual_robot_current" type="DOUBLE"/>
+		<field name="actual_joint_voltage" type="VECTOR6D"/>
+		<field name="actual_digital_output_bits" type="UINT64"/>
+		<field name="runtime_state" type="UINT32"/>
+<!--
+		<field name="payload" type="DOUBLE"/>
+		<field name="payload_cog" type="VECTOR3D"/>
+		<field name="script_control_line" type="UINT32"/>
+		<field name="output_bit_registers0_to_31" type="UINT32"/>
+		<field name="output_bit_registers32_to_63" type="UINT32"/>
+
+		<field name="output_int_register_0" type="INT32"/>
+		<field name="output_int_register_1" type="INT32"/>
+		<field name="output_int_register_2" type="INT32"/>
+		<field name="output_int_register_3" type="INT32"/>
+		<field name="output_int_register_4" type="INT32"/>
+		<field name="output_int_register_5" type="INT32"/>
+		<field name="output_int_register_6" type="INT32"/>
+		<field name="output_int_register_7" type="INT32"/>
+		<field name="output_int_register_8" type="INT32"/>
+		<field name="output_int_register_9" type="INT32"/>
+		<field name="output_int_register_10" type="INT32"/>
+		<field name="output_int_register_11" type="INT32"/>
+		<field name="output_int_register_12" type="INT32"/>
+		<field name="output_int_register_13" type="INT32"/>
+		<field name="output_int_register_14" type="INT32"/>
+		<field name="output_int_register_15" type="INT32"/>
+		<field name="output_int_register_16" type="INT32"/>
+		<field name="output_int_register_17" type="INT32"/>
+		<field name="output_int_register_18" type="INT32"/>
+		<field name="output_int_register_19" type="INT32"/>
+		<field name="output_int_register_20" type="INT32"/>
+		<field name="output_int_register_21" type="INT32"/>
+		<field name="output_int_register_22" type="INT32"/>
+		<field name="output_int_register_23" type="INT32"/>
+
+		<field name="output_double_register_0" type="DOUBLE"/>
+		<field name="output_double_register_1" type="DOUBLE"/>
+		<field name="output_double_register_2" type="DOUBLE"/>
+		<field name="output_double_register_3" type="DOUBLE"/>
+		<field name="output_double_register_4" type="DOUBLE"/>
+		<field name="output_double_register_5" type="DOUBLE"/>
+		<field name="output_double_register_6" type="DOUBLE"/>
+		<field name="output_double_register_7" type="DOUBLE"/>
+		<field name="output_double_register_8" type="DOUBLE"/>
+		<field name="output_double_register_9" type="DOUBLE"/>
+		<field name="output_double_register_10" type="DOUBLE"/>
+		<field name="output_double_register_11" type="DOUBLE"/>
+		<field name="output_double_register_12" type="DOUBLE"/>
+		<field name="output_double_register_13" type="DOUBLE"/>
+		<field name="output_double_register_14" type="DOUBLE"/>
+		<field name="output_double_register_15" type="DOUBLE"/>
+		<field name="output_double_register_16" type="DOUBLE"/>
+		<field name="output_double_register_17" type="DOUBLE"/>
+		<field name="output_double_register_18" type="DOUBLE"/>
+		<field name="output_double_register_19" type="DOUBLE"/>
+		<field name="output_double_register_20" type="DOUBLE"/>
+		<field name="output_double_register_21" type="DOUBLE"/>
+		<field name="output_double_register_22" type="DOUBLE"/>
+		<field name="output_double_register_23" type="DOUBLE"/>
+	-->
+	</recipe>
+</rtde_config>
