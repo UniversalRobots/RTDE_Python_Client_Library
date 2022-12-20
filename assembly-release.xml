@@ -7,15 +7,11 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/dev</directory>
+            <directory>${project.build.directory}/release</directory>
             <outputDirectory>/rtde-${version}/</outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
-            <excludes>
-                <exclude>setup.py</exclude>
-                <exclude>setup.cfg</exclude>
-            </excludes>
         </fileSet>
     </fileSets>
 </assembly>

@@ -23,15 +23,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from setuptools import setup
 
-
-with open("../VERSION", "rb") as f:
-    version = f.read().decode("utf-8")
-    version = version.split("-")[0]
-
-
 setup(
     name="UrRtde",
     packages=["rtde"],
-    version=version,
+    version="2.7.1",
     description="Real-Time Data Exchange (RTDE) python client + examples",
 )

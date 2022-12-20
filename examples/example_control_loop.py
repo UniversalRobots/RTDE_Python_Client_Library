@@ -23,27 +23,28 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-sys.path.append('..')
+
+sys.path.append("..")
 import logging
 
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
 
 
-#logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
-ROBOT_HOST = 'localhost'
+ROBOT_HOST = "localhost"
 ROBOT_PORT = 30004
-config_filename = 'control_loop_configuration.xml'
+config_filename = "control_loop_configuration.xml"
 
 keep_running = True
 
 logging.getLogger().setLevel(logging.INFO)
 
 conf = rtde_config.ConfigFile(config_filename)
-state_names, state_types = conf.get_recipe('state')
-setp_names, setp_types = conf.get_recipe('setp')
-watchdog_names, watchdog_types = conf.get_recipe('watchdog')
+state_names, state_types = conf.get_recipe("state")
+setp_names, setp_types = conf.get_recipe("setp")
+watchdog_names, watchdog_types = conf.get_recipe("watchdog")
 
 con = rtde.RTDE(ROBOT_HOST, ROBOT_PORT)
 con.connect()
@@ -66,22 +67,25 @@ setp.input_double_register_2 = 0
 setp.input_double_register_3 = 0
 setp.input_double_register_4 = 0
 setp.input_double_register_5 = 0
-  
+
 # The function "rtde_set_watchdog" in the "rtde_control_loop.urp" creates a 1 Hz watchdog
 watchdog.input_int_register_0 = 0
 
+
 def setp_to_list(setp):
     list = []
-    for i in range(0,6):
+    for i in range(0, 6):
         list.append(setp.__dict__["input_double_register_%i" % i])
     return list
 
+
 def list_to_setp(setp, list):
-    for i in range (0,6):
+    for i in range(0, 6):
         setp.__dict__["input_double_register_%i" % i] = list[i]
     return setp
 
-#start data synchronization
+
+# start data synchronization
 if not con.send_start():
     sys.exit()
 
@@ -89,15 +93,15 @@ if not con.send_start():
 while keep_running:
     # receive the current state
     state = con.receive()
-    
+
     if state is None:
-        break;
-    
+        break
+
     # do something...
     if state.output_int_register_0 != 0:
         new_setp = setp1 if setp_to_list(setp) == setp2 else setp2
         list_to_setp(setp, new_setp)
-        # send new setpoint        
+        # send new setpoint
         con.send(setp)
 
     # kick watchdog

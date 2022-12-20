@@ -6,14 +6,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ur.rtde.client</groupId>
   <artifactId>python</artifactId>
-  <version>2.7.0</version>
+  <version>2.7.1</version>
   <packaging>pom</packaging>
-  <parent>
-    <groupId>com.ur</groupId>
-    <artifactId>parent-universal</artifactId>
-    <version>1.0.3</version>
-    <relativePath/>
-  </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -47,31 +41,13 @@
                   <directory>${project.basedir}</directory>
                   <includes>
                     <include>examples/**</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>copy python files for dev / internal usage</id>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <overwrite>true</overwrite>
-              <outputDirectory>${project.basedir}/target/dev</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}</directory>
-                  <includes>
-                    <include>/**/*</include>
+                    <include>README.md</include>
+                    <include>LICENSE</include>
+                    <include>setup.py</include>
+                    <include>setup.cfg</include>
                   </includes>
                   <excludes>
-                    <exclude>pom.xml</exclude>
-                    <exclude>assembly*.xml</exclude>
-                    <exclude>target/**</exclude>
+                    <exclude>**/*pyc</exclude>
                   </excludes>
                 </resource>
               </resources>
@@ -95,19 +71,6 @@
               <appendAssemblyId>true</appendAssemblyId>
               <descriptors>
                 <descriptor>assembly-release.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-          <execution>
-            <id>Create development tar.gz</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <appendAssemblyId>true</appendAssemblyId>
-              <descriptors>
-                <descriptor>assembly-dev.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
