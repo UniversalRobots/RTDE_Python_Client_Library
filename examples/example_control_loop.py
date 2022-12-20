@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2016, Universal Robots A/S,
+# Copyright (c) 2016-2022, Universal Robots A/S,
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -72,17 +72,17 @@ setp.input_double_register_5 = 0
 watchdog.input_int_register_0 = 0
 
 
-def setp_to_list(setp):
-    list = []
+def setp_to_list(sp):
+    sp_list = []
     for i in range(0, 6):
-        list.append(setp.__dict__["input_double_register_%i" % i])
-    return list
+        sp_list.append(sp.__dict__["input_double_register_%i" % i])
+    return sp_list
 
 
-def list_to_setp(setp, list):
+def list_to_setp(sp, list):
     for i in range(0, 6):
-        setp.__dict__["input_double_register_%i" % i] = list[i]
-    return setp
+        sp.__dict__["input_double_register_%i" % i] = list[i]
+    return sp
 
 
 # start data synchronization
@@ -90,6 +90,7 @@ if not con.send_start():
     sys.exit()
 
 # control loop
+move_completed = True
 while keep_running:
     # receive the current state
     state = con.receive()
@@ -98,11 +99,18 @@ while keep_running:
         break
 
     # do something...
-    if state.output_int_register_0 != 0:
+    if move_completed and state.output_int_register_0 == 1:
+        move_completed = False
         new_setp = setp1 if setp_to_list(setp) == setp2 else setp2
         list_to_setp(setp, new_setp)
+        print("New pose = " + str(new_setp))
         # send new setpoint
         con.send(setp)
+        watchdog.input_int_register_0 = 1
+    elif not move_completed and state.output_int_register_0 == 0:
+        print("Move to confirmed pose = " + str(state.target_q))
+        move_completed = True
+        watchdog.input_int_register_0 = 0
 
     # kick watchdog
     con.send(watchdog)
