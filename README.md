@@ -58,9 +58,26 @@ mvn package
 ```
 ## Using with virtual environment
 Create virtual environment, and install wheel package
+
+### Linux & MacOS
 ```
 python -m venv venv
 source venv/bin/activate
+pip install wheel
+```
+Install rtde package
+```
+pip install target/rtde-<version>-release.zip
+```
+
+### Windows PowerShell
+If Python3 is not installed, then just run python3 from powershell. Microsoft store will launch the installation.
+
+Permission to run scripts in console is needed to activate virtual envrionment.
+```
+set-executionpolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+python -m venv venv
+venv/Scripts/Activate.ps1
 pip install wheel
 ```
 Install rtde package
