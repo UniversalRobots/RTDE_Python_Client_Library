@@ -108,7 +108,7 @@ class CSVBinaryWriter(object):
             headerStr += self.__header_names[i]
 
         headerStr += "\n"
-        self.__file.write(struct.pack(str(len(headerStr)) + "s", headerStr))
+        self.__file.write(struct.pack(str(len(headerStr)) + "s", headerStr if sys.version_info[0] < 3 else headerStr.encode("utf-8")))
 
         # Header types
         typeStr = str("")
@@ -119,7 +119,7 @@ class CSVBinaryWriter(object):
             typeStr += self.getType(self.__types[i])
 
         typeStr += "\n"
-        self.__file.write(struct.pack(str(len(typeStr)) + "s", typeStr))
+        self.__file.write(struct.pack(str(len(typeStr)) + "s", typeStr if sys.version_info[0] < 3 else typeStr.encode("utf-8")))
 
     def packToBinary(self, vtype, value):
         print(vtype)
