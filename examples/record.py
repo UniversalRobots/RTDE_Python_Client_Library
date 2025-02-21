@@ -25,17 +25,21 @@
 import argparse
 import logging
 import sys
-
 sys.path.append("..")
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
 import rtde.csv_writer as csv_writer
 import rtde.csv_binary_writer as csv_binary_writer
 
+#probably going to use
+#import asyncio or
+#import thread
+
+
 # parameters
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--host", default="localhost", help="name of host to connect to (localhost)"
+parser.add_argument( # default="localhost" needs to be swapped with the robot IP!
+    "--host", default="192.168.80.102", help="name of host to connect to (localhost)"
 )
 parser.add_argument("--port", type=int, default=30004, help="port number (30004)")
 parser.add_argument(
@@ -51,8 +55,8 @@ parser.add_argument(
 )
 parser.add_argument(
     "--output",
-    default="robot_data.csv",
-    help="data output file to write to (robot_data.csv)",
+    default="../csv_data/jointData.csv",
+    help="data output file to write to (JointData.csv)",
 )
 parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
 parser.add_argument(
@@ -87,7 +91,12 @@ if not con.send_start():
     logging.error("Unable to start synchronization")
     sys.exit()
 
+#for writing to csv
+#
+#
+
 writeModes = "wb" if args.binary else "w"
+
 with open(args.output, writeModes) as csvfile:
     writer = None
 
@@ -100,6 +109,7 @@ with open(args.output, writeModes) as csvfile:
 
     i = 1
     keep_running = True
+
     while keep_running:
 
         if i % args.frequency == 0:
@@ -122,14 +132,15 @@ with open(args.output, writeModes) as csvfile:
                 writer.writerow(state)
                 i += 1
 
-        except KeyboardInterrupt:
-            keep_running = False
+        #don't want anny keyboeard interruption to stop the program.
+        #except KeyboardInterrupt:
+        #    keep_running = False
         except rtde.RTDEException:
             con.disconnect()
             sys.exit()
 
 
-sys.stdout.write("\rComplete!            \n")
+sys.stdout.write("\rComplete! \n")
 
 con.send_pause()
 con.disconnect()

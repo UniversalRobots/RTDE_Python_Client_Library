@@ -1,17 +1,24 @@
 <?xml version="1.0"?>
 <rtde_config>
 	<recipe key="out">
-		<field name="timestamp" type="DOUBLE"/>
+		<!--<field name="timestamp" type="DOUBLE"/>
 		<field name="target_q" type="VECTOR6D"/>
 		<field name="target_qd" type="VECTOR6D"/>
 		<field name="target_qdd" type="VECTOR6D"/>
 		<field name="target_current" type="VECTOR6D"/>
-		<field name="target_moment" type="VECTOR6D"/>
+		<field name="target_moment" type="VECTOR6D"/> -->
+		<!--
+		-->
 		<field name="actual_q" type="VECTOR6D"/>
+		<!-- actual_qd is joint velocities -->
+		<!--
 		<field name="actual_qd" type="VECTOR6D"/>
 		<field name="actual_current" type="VECTOR6D"/>
-		<field name="joint_control_output" type="VECTOR6D"/>
+		<field name="joint_control_output" type="VECTOR6D"/> -->
+		<!-- TCP is tool center point, so that is very very very nice
+		 -->
 		<field name="actual_TCP_pose" type="VECTOR6D"/>
+		<!--
 		<field name="actual_TCP_speed" type="VECTOR6D"/>
 		<field name="actual_TCP_force" type="VECTOR6D"/>
 		<field name="target_TCP_pose" type="VECTOR6D"/>
@@ -32,7 +39,7 @@
 		<field name="actual_joint_voltage" type="VECTOR6D"/>
 		<field name="actual_digital_output_bits" type="UINT64"/>
 		<field name="runtime_state" type="UINT32"/>
-		<field name="joint_position_deviation_ratio" type="DOUBLE"/>
+		<field name="joint_position_deviation_ratio" type="DOUBLE"/> -->
 <!--
 		<field name="payload" type="DOUBLE"/>
 		<field name="payload_cog" type="VECTOR3D"/>
