@@ -54,12 +54,13 @@ class CSVWriter(object):
         self.__writer.writerow(self.__header_names)
 
     def writerow(self, data_object):
-        data = []
-        for i in range(len(self.__names)):
-            size = serialize.get_item_size(self.__types[i])
-            value = data_object.__dict__[self.__names[i]]
-            if size > 1:
-                data.extend(value)
+        row = []
+        for i, name in enumerate(self.__names):
+            if isinstance(data_object, list):
+                value = data_object[i]
             else:
-                data.append(value)
-        self.__writer.writerow(data)
+                value = getattr(data_object, name, None)
+            if isinstance(value, list):
+                value = str(value)
+            row.append(value)
+        self.__writer.writerow(row)
