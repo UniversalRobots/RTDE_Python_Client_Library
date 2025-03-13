@@ -98,7 +98,6 @@ while keep_running:
     if state is None:
         break
 
-    # do something...
     if move_completed and state.output_int_register_0 == 1:
         move_completed = False
         new_setp = setp1 if setp_to_list(setp) == setp2 else setp2

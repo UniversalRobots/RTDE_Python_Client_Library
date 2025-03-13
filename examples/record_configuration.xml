@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <rtde_config>
     <recipe key="out">
-        <field name="actual_qd" type="VECTOR6D"/>
+        <field name="actual_q" type="VECTOR6D"/>
         <field name="actual_TCP_pose" type="VECTOR6D"/>
     </recipe>
 </rtde_config>

@@ -21,7 +21,11 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+#
+#
+#
+#
+#
 import argparse
 import logging
 import sys
@@ -45,13 +49,13 @@ if args.verbose:
     logging.basicConfig(level=logging.INFO)
 
 conf = rtde_config.ConfigFile(args.config)
-output_names, output_types = conf.get_recipe("out")
+outputNames, outputTypes = conf.get_recipe("out")
 
 con = rtde.RTDE(args.host, args.port)
 con.connect()
 con.get_controller_version()
 
-if not con.send_output_setup(output_names, output_types, frequency=args.frequency):
+if not con.send_output_setup(outputNames, outputTypes, frequency=args.frequency):
     logging.error("Unable to configure output")
     sys.exit()
 
@@ -59,27 +63,26 @@ if not con.send_start():
     logging.error("Unable to start synchronization")
     sys.exit()
 
-with open(args.output, 'w', newline='') as csvfile:  # Plain csv, newline=''
-    csv_writer = csv.writer(csvfile)  # Use Python's csv writer
+with open(args.output, 'w', newline='') as csvfile:
+    CSVWriter = csv.writer(csvfile)
 
-    # Write header
-    header = ["timestamp"] + [f"{name}_{i}" for name in output_names for i in range(6)]
-    csv_writer.writerow(header)
+    header = ["timestamp"] + [f"{name}_{i}" for name in outputNames for i in range(6)]
+    CSVWriter.writerow(header)
 
     i = 1
-    keep_running = True
-    while keep_running:
+    keepRunning = True
+    while keepRunning:
         try:
             state = con.receive()
             if state is not None:
                 timestamp = time.time()
-                row = [timestamp]  # Start row with timestamp
+                row = [timestamp]
 
-                for name in output_names:
-                    vector_data = getattr(state, name) # Get the vector data
-                    row.extend(vector_data) # Extend the row with vector elements
+                for name in outputNames:
+                    vector_data = getattr(state, name)
+                    row.extend(vector_data)
 
-                csv_writer.writerow(row)  # Write the row
+                CSVWriter.writerow(row)  # Write the row
                 i += 1
 
         except rtde.RTDEException:
