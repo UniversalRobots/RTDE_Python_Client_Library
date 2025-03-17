@@ -5,22 +5,33 @@ import sys
 import time
 import csv
 import serial_asyncio  # Async serial communication
+from serial_asyncio import create_serial_connection  # Explicit import
 sys.path.append("..")
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
 
 
-# ------------------------------
-# ARGUMENT PARSER (Robot + CSV)
-# ------------------------------
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--host", default="192.168.80.102", help="Robot IP")
+parser.add_argument("--host", default="192.168.0.100", help="Robot IP")
 parser.add_argument("--port", type=int, default=30004, help="Port number")
 parser.add_argument("--frequency", type=int, default=125, help="Sampling frequency")
 parser.add_argument("--config", default="record_configuration.xml", help="Config file")
-parser.add_argument("--output_rtde", default="../csv_data/jointData.csv", help="Robot Output CSV")
-parser.add_argument("--output_arduino", default="../csv_data/arduinoData.csv", help="Arduino Output CSV")
-parser.add_argument("--serial_port", default="COM3", help="Arduino Serial Port")
+
+
+# ------------------------------
+# Fill in CSV data file locations here
+# ------------------------------
+
+parser.add_argument("--output_rtde", default="../csv_data/jointDataInSync.csv", help="Robot Output CSV")
+parser.add_argument("--output_arduino", default="../csv_data/arduinoDataInSync.csv", help="Arduino Output CSV")
+
+#------------------------------------------
+# Fill inn arduino com serial port under here
+#------------------------------------------
+parser.add_argument("--serial_port", default="COM12", help="Arduino Serial Port")
+
+
 parser.add_argument("--baud_rate", type=int, default=9600, help="Arduino Baud Rate")
 parser.add_argument("--verbose", action="store_true", help="Verbose output")
 args = parser.parse_args()
@@ -87,11 +98,11 @@ class SerialReaderProtocol(asyncio.Protocol):
             lines = self.buffer.split("\n")
             for line in lines[:-1]:  # Process full lines
                 self.process_line(line.strip())
-            self.buffer = lines[-1]  # Keep remaining incomplete data
+            self.buffer = lines[-1]
 
     def process_line(self, line):
-        parts = line.split(",")  # Will receive three sensor values from the arduino
-        if len(parts) == 3:
+        parts = line.split(",")  # Will receive three sensor values from the arduino, from each sensor and 2 outputs ux()
+        if len(parts) == 11:
             timestamp = time.time()
             row = [timestamp] + parts
             self.csv_writer.writerow(row)
@@ -101,17 +112,21 @@ class SerialReaderProtocol(asyncio.Protocol):
 async def read_arduino():
     with open(args.output_arduino, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
+        # TODO:
+        # TODO: FIX::::
+        writer.writerow(["timestamp", "sensor1_x", "sensor1_y"])  # Your headers
 
-        writer.writerow(["timestamp", "sensor1", "sensor2", "sensor3"])
-
-        loop = asyncio.get_running_loop()
+        # Use create_serial_connection with protocol
         transport, protocol = await serial_asyncio.create_serial_connection(
-            loop, lambda: SerialReaderProtocol(writer), args.serial_port, baudrate=args.baud_rate
+            asyncio.get_event_loop(),
+            lambda: SerialReaderProtocol(writer),
+            args.serial_port,
+            baudrate=args.baud_rate
         )
 
         try:
-            await asyncio.Future()  # Keep running
-        finally:
+            await asyncio.Future()  # Run indefinitely
+        except asyncio.CancelledError:
             transport.close()
 
 
