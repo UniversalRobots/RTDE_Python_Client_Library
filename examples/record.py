@@ -44,7 +44,7 @@ parser.add_argument("--host", default="192.168.0.100", help="Robot IP")
 parser.add_argument("--port", type=int, default=30004, help="Port number")
 parser.add_argument("--frequency", type=int, default=125, help="Sampling frequency")
 parser.add_argument("--config", default="record_configuration.xml", help="Config file")
-parser.add_argument("--output", default="../csv_data/jointData.csv", help="Output file")
+parser.add_argument("--output", default="../csv_data/jointData2.csv", help="Output file")
 parser.add_argument("--verbose", action="store_true", help="Verbose output")
 args = parser.parse_args()
 

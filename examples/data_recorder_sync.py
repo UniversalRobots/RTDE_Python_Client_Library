@@ -6,6 +6,11 @@ import time
 import csv
 import serial_asyncio  # Async serial communication
 from serial_asyncio import create_serial_connection  # Explicit import
+from arduinoRecorder_standalone.arduinoRecorder import SerialReaderProtocol
+
+
+
+
 sys.path.append("..")
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
@@ -16,7 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--host", default="192.168.0.100", help="Robot IP")
 parser.add_argument("--port", type=int, default=30004, help="Port number")
 parser.add_argument("--frequency", type=int, default=125, help="Sampling frequency")
-parser.add_argument("--config", default="record_configuration.xml", help="Config file")
+parser.add_argument("--config", default="../xmlData/record_configuration.xml", help="Config file")
 
 
 # ------------------------------
@@ -86,27 +91,6 @@ async def collect_rtde_data():
 # ------------------------------
 # ASYNC ARDUINO SERIAL READING TASK
 # ------------------------------
-class SerialReaderProtocol(asyncio.Protocol):
-    def __init__(self, csv_writer):
-        self.csv_writer = csv_writer
-        self.buffer = ""
-
-    def data_received(self, data):
-        self.buffer += data.decode()  # Decode incoming data
-
-        if "\n" in self.buffer:  # If a complete line is received
-            lines = self.buffer.split("\n")
-            for line in lines[:-1]:  # Process full lines
-                self.process_line(line.strip())
-            self.buffer = lines[-1]
-
-    def process_line(self, line):
-        parts = line.split(",")  # Will receive three sensor values from the arduino, from each sensor and 2 outputs ux()
-        if len(parts) == 11:
-            timestamp = time.time()
-            row = [timestamp] + parts
-            self.csv_writer.writerow(row)
-            print(f"Arduino Data: {row}")
 
 
 async def read_arduino():
@@ -114,7 +98,7 @@ async def read_arduino():
         writer = csv.writer(csvfile)
         # TODO:
         # TODO: FIX::::
-        writer.writerow(["timestamp", "sensor1_x", "sensor1_y"])  # Your headers
+        writer.writerow(["timestamp", "sensor1_x", "sensor1_y"])
 
         # Use create_serial_connection with protocol
         transport, protocol = await serial_asyncio.create_serial_connection(

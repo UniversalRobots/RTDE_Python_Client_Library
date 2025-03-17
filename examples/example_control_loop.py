@@ -35,7 +35,7 @@ import rtde.rtde_config as rtde_config
 
 ROBOT_HOST = "localhost"
 ROBOT_PORT = 30004
-config_filename = "control_loop_configuration.xml"
+config_filename = "../xmlDataReader/control_loop_configuration.xml"
 
 keep_running = True
 
