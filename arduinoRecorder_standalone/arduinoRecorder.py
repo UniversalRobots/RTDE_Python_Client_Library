@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser()
 # ------------------------------
 # Fill in CSV data file locations here
 # ------------------------------
-parser.add_argument("--output_arduino", default="../csv_data/standalone_arduino_data/arduinoTraining.csv", help="Arduino Output CSV")
+parser.add_argument("--output_arduino", default="../csv_data/standalone_arduino_data/arduinoTrainingCalm25032025.csv", help="Arduino Output CSV")
 
 #------------------------------------------
 # Fill in arduino com serial port under here

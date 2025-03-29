@@ -23,17 +23,19 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-
+from ur_ikfast import ur_kinematics
 sys.path.append("..")
 import logging
-
+import urx
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
 
-
+# inverse kinematics library :
+# https://github.com/cambel/ur_ikfast
 # logging.basicConfig(level=logging.INFO)
-
-ROBOT_HOST = "localhost"
+# Robot IP
+ROBOT_HOST = "10.0.12.245"
+#usually standard for RTDE and UR robots
 ROBOT_PORT = 30004
 config_filename = "../xmlDataReader/control_loop_configuration.xml"
 
@@ -58,8 +60,15 @@ setp = con.send_input_setup(setp_names, setp_types)
 watchdog = con.send_input_setup(watchdog_names, watchdog_types)
 
 # Setpoints to move the robot to
-setp1 = [-0.12, -0.43, 0.14, 0, 3.11, 0.04]
-setp2 = [-0.12, -0.51, 0.21, 0, 3.11, 0.04]
+setp1 = [-0.12, 0.43, -0.14, -1, 2.11, -0.04]
+setp2 = [-0.12, -0.51, -0.21, 1, 2.11, -0.04]
+
+
+
+# Desired pose: x, y, z (meters), rx, ry, rz (radians)
+target_pose = p[0.3, 0.4, 0.2, 0, 3.14, 0]
+
+movel(target_pose, a=1.2, v=0.25)
 
 setp.input_double_register_0 = 0
 setp.input_double_register_1 = 0

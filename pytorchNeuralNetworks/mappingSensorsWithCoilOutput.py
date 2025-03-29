@@ -23,9 +23,13 @@ print(f"ONNX version: {onnx.__version__}")
 #https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
 #https://machinelearningmastery.com/develop-your-first-neural-network-with-pytorch-step-by-step/
 # Load your recorded data
-data = np.loadtxt("../csv_data/standalone_arduino_data/arduinoTraining25032025.csv", delimiter=",", skiprows=1)  # Load CSV data
-Y = data[:, 1:4]  # 2nd to the 4th columns of sensor data
-X = data[:, 4+3:7+3]  # 5th to the 8th columns of sensor data
+data = np.loadtxt("../csv_data/standalone_arduino_data/arduinoTrainingCalm25032025.csv", delimiter=",", skiprows=1)  # Load CSV data
+#The two last are coil output
+nestInline = 3
+X = data[:, [4+0, 5+0, 6+0, 9, 10]]
+#number 1 is the clock
+Y = data[:, [1, 2, 3]]
+print(Y)
 
 print(X)
 print("This was the first rows of data data")
@@ -40,16 +44,15 @@ Y_train = torch.tensor(Y, dtype=torch.float32)
 class MappingNN(nn.Module):
     def __init__(self):
         super(MappingNN, self).__init__()
-        self.fc1 = nn.Linear(3, 16)  # Input 3 -> Hidden 16
-        self.fc2 = nn.Linear(16, 16) # Hidden 16 -> Hidden 16
-        self.fc3 = nn.Linear(16, 3)  # Changed to output 3 values
+        self.fc1 = nn.Linear(5, 32)  # Input 5 -> Hidden 32
+        self.fc2 = nn.Linear(32, 16) # Hidden 32 -> Hidden 16
+        self.fc3 = nn.Linear(16, 3)  # Hidden 16 -> Output 3
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-
 # Initialize and Train
 model = MappingNN()
 criterion = nn.MSELoss()
@@ -69,8 +72,9 @@ for epoch in range(500):
 # Save the model
 #torch.save(model.state_dict(), "mapped_models/mapped_model_sensorA0_and_A1.pth")
 
+#use double instead??
+dummy_input = torch.randn(1, 5, dtype=torch.float32)
 
-dummy_input = torch.randn(1, 3, dtype=torch.float32)
 
 
 print("Layer fc1 Weights:\n", model.fc1.weight.data)
@@ -95,7 +99,7 @@ for name, param in model.named_parameters():
 torch.onnx.export(
     model,                       # Trained model
     dummy_input,                 # Example input
-    "mapped_models/mapped_sensorA2_and_A025032025.onnx",  # Output ONNX file name
+    "mapped_models_with_coils/CalmsSensrCoils_A1_and_A0_25032025.onnx",  # Output ONNX file name
     opset_version=20,
     #verbose=False,
     input_names=["input"],       # Input node name
