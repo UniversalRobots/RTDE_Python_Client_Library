@@ -23,7 +23,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-from ur_ikfast import ur_kinematics
+#from ur_ikfast import ur_kinematics
 sys.path.append("..")
 import logging
 import urx
@@ -66,9 +66,9 @@ setp2 = [-0.12, -0.51, -0.21, 1, 2.11, -0.04]
 
 
 # Desired pose: x, y, z (meters), rx, ry, rz (radians)
-target_pose = p[0.3, 0.4, 0.2, 0, 3.14, 0]
+#target_pose = p[0.3, 0.4, 0.2, 0, 3.14, 0]
 
-movel(target_pose, a=1.2, v=0.25)
+#movel(target_pose, a=1.2, v=0.25)
 
 setp.input_double_register_0 = 0
 setp.input_double_register_1 = 0
