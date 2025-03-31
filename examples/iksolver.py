@@ -2,22 +2,22 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 
-class UR5InverseKinematics:
+class URIKSolver:
     def __init__(self, a, d, alpha, w):
         # DH parameters for UR5
         #self.a = [0, -0.425, -0.39225, 0, 0, 0]
         #self.d = [0.089159, 0, 0, 0.10915, 0.09465, 0.0823]
         #self.alpha = [np.pi / 2, 0, 0, np.pi / 2, -np.pi / 2, 0]
         #going to have dh parameters for UR3 plus it's extension
-        self.a = [0, -0.425, -0.39225, 0, 0, 0]
-        self.d = [0.089159, 0, 0, 0.10915, 0.09465, 0.0823]
-        self.alpha = [np.pi / 2, 0, 0, np.pi / 2, -np.pi / 2, 0]
+        self.a = a
+        self.d = d
+        self.alpha = alpha
 
         # Weights for selecting closest solution
         #self.weights = np.array([6, 5, 4, 3, 2, 1])
         self.weights = np.array(w)
 
-    def solve(self, pos, eul, q_previous):
+    def solve(self, posEul, q_previous):
         """
         Solve inverse kinematics for UR5 robot
 
@@ -29,31 +29,27 @@ class UR5InverseKinematics:
         Returns:
         np.array: Joint angles that achieve the desired pose
         """
-        # Convert orientation to rotation matrix
+        pos = posEul[:3]
+        eul = posEul[-3:]
+        print(pos)
+        print(eul)
+
         rot = R.from_euler('zyx', eul).as_matrix()
         T06 = np.eye(4)
         T06[:3, :3] = rot
         T06[:3, 3] = pos
-
-        theta1_ = self._calculate_theta1(T06)
-
-        theta5_ = self._calculate_theta5(T06, theta1_)
-
-        theta6_ = self._calculate_theta6(T06, theta1_, theta5_)
-
-        theta3_, P14_, T14_ = self._calculate_theta3(T06, theta1_, theta5_, theta6_)
-
-        theta2_ = self._calculate_theta2(theta3_, P14_)
-
-        theta4_ = self._calculate_theta4(theta2_, theta3_, T14_)
-
+        theta1_ = self.calculateTheta1(T06)
+        theta5_ = self.calculateTheta5(T06, theta1_)
+        theta6_ = self.calculateTheta6(T06, theta1_, theta5_)
+        theta3_, P14_, T14_ = self.calculateTheta3(T06, theta1_, theta5_, theta6_)
+        theta2_ = self.calculateTheta2(theta3_, P14_)
+        theta4_ = self.calculateTheta4(theta2_, theta3_, T14_)
         solutions = self._generate_possible_solutions(theta1_, theta2_, theta3_, theta4_, theta5_, theta6_)
-
         solution = self._closest_solution(solutions, q_previous)
 
         return solution
 
-    def _calculate_theta1(self, T06):
+    def calculateTheta1(self, T06):
         """Calculate theta1 solutions"""
         P05 = T06 @ np.array([0, 0, -self.d[5], 1])
         theta1_ = []
@@ -70,7 +66,7 @@ class UR5InverseKinematics:
 
         return np.array([theta1P, theta1M])
 
-    def _calculate_theta5(self, T06, theta1_):
+    def calculateTheta5(self, T06, theta1_):
         """Calculate theta5 solutions"""
         theta5_ = np.zeros(4)
         idx = 0
@@ -88,14 +84,14 @@ class UR5InverseKinematics:
 
         return theta5_
 
-    def _calculate_theta6(self, T06, theta1_, theta5_):
+    def calculateTheta6(self, T06, theta1_, theta5_):
         """Calculate theta6 solutions"""
         T60 = np.linalg.inv(T06)
         X60 = T60[:3, 0]
         Y60 = T60[:3, 1]
 
         theta6_ = np.zeros(4)
-        t5 = [0, 2]  # Indices for theta5 solutions
+        t5 = [0, 2]
 
         idx = 0
         for t1 in range(len(theta1_)):
@@ -115,7 +111,7 @@ class UR5InverseKinematics:
         else:
             return 0
 
-    def _calculate_theta3(self, T06, theta1_, theta5_, theta6_):
+    def calculateTheta3(self, T06, theta1_, theta5_, theta6_):
         """Calculate theta3 solutions"""
         theta3_ = np.zeros(8)
         P14_ = np.zeros((8, 3))
@@ -180,7 +176,7 @@ class UR5InverseKinematics:
 
         return P14, T14
 
-    def _calculate_theta2(self, theta3_, P14_):
+    def calculateTheta2(self, theta3_, P14_):
         """Calculate theta2 solutions"""
         theta2_ = np.zeros(8)
 
@@ -194,7 +190,7 @@ class UR5InverseKinematics:
 
         return theta2_
 
-    def _calculate_theta4(self, theta2_, theta3_, T14_):
+    def calculateTheta4(self, theta2_, theta3_, T14_):
         """Calculate theta4 solutions"""
         theta4_ = np.zeros(8)
 

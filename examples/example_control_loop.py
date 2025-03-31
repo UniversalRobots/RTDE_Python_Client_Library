@@ -60,15 +60,8 @@ setp = con.send_input_setup(setp_names, setp_types)
 watchdog = con.send_input_setup(watchdog_names, watchdog_types)
 
 # Setpoints to move the robot to
-setp1 = [-0.12, 0.43, -0.14, -1, 2.11, -0.04]
-setp2 = [-0.12, -0.51, -0.21, 1, 2.11, -0.04]
-
-
-
-# Desired pose: x, y, z (meters), rx, ry, rz (radians)
-#target_pose = p[0.3, 0.4, 0.2, 0, 3.14, 0]
-
-#movel(target_pose, a=1.2, v=0.25)
+setp1 = [-0.12, -0.43, 0.14, 0, 3.11, 0.04]
+setp2 = [-0.12, -0.51, 0.21, 0, 3.11, 0.04]
 
 setp.input_double_register_0 = 0
 setp.input_double_register_1 = 0
@@ -87,12 +80,19 @@ def setp_to_list(sp):
         sp_list.append(sp.__dict__["input_double_register_%i" % i])
     return sp_list
 
-
 def list_to_setp(sp, list):
     for i in range(0, 6):
         sp.__dict__["input_double_register_%i" % i] = list[i]
     return sp
 
+# Define your setpoints queue
+setpoints_queue = [
+    [0.1, -1.57, -1.57, -1.57, 1.57, 0.0],  # Joint positions for setpoint 1
+    [0.2, -1.57, -1.57, -1.57, 1.57, 0.0],  # Joint positions for setpoint 2
+    [0.3, -1.57, -1.57, -1.57, 1.57, 0.0],  # Joint positions for setpoint 3
+    # Add as many setpoints as you need
+]
+current_setpoint_index = 0
 
 # start data synchronization
 if not con.send_start():
@@ -107,14 +107,20 @@ while keep_running:
     if state is None:
         break
 
+    # do something...
     if move_completed and state.output_int_register_0 == 1:
-        move_completed = False
-        new_setp = setp1 if setp_to_list(setp) == setp2 else setp2
-        list_to_setp(setp, new_setp)
-        print("New pose = " + str(new_setp))
-        # send new setpoint
-        con.send(setp)
-        watchdog.input_int_register_0 = 1
+        if current_setpoint_index < len(setpoints_queue):
+            move_completed = False
+            new_setp = setpoints_queue[current_setpoint_index]
+            current_setpoint_index += 1
+            list_to_setp(setp, new_setp)
+            print(f"Moving to setpoint {current_setpoint_index}: {new_setp}")
+            # send new setpoint
+            con.send(setp)
+            watchdog.input_int_register_0 = 1
+        else:
+            print("All setpoints completed!")
+            keep_running = False  # or set to True if you want to loop forever
     elif not move_completed and state.output_int_register_0 == 0:
         print("Move to confirmed pose = " + str(state.target_q))
         move_completed = True
@@ -124,5 +130,3 @@ while keep_running:
     con.send(watchdog)
 
 con.send_pause()
-
-con.disconnect()
