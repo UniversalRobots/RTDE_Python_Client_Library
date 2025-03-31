@@ -41,10 +41,10 @@ alpha = [np.pi/2, 0, 0, np.pi/2, -np.pi/2, 0]
 weights = np.array([6, 5, 4, 3, 2, 1])  # Prioritize base joints
 
 ik_solver = URIKSolver(a, d, alpha, weights)
-posEul = [0.2, 0.1, 0.3, 0, np.pi, 0]  # [x,y,z, rz,ry,rx] in meters/radians
-q_previous = np.zeros(6)  # Previous joint angles (radians)
+posEul = [0.2, 0.1, 0.3, 0, -np.pi, 0]
+initialPos = np.zeros(6)
 
-solution_radians = ik_solver.solve(posEul, q_previous)
+solution_radians = ik_solver.solve(posEul, initialPos)
 print("Joint angles (radians):", solution_radians)
 
 for i in solution_radians:

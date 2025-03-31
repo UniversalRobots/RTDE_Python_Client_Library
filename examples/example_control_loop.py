@@ -29,11 +29,18 @@ import logging
 import urx
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
+from math import pi
+from examples.iksolver import URIKSolver
+import numpy as np
 
 # inverse kinematics library :
 # https://github.com/cambel/ur_ikfast
 # logging.basicConfig(level=logging.INFO)
 # Robot IP
+
+
+#https://www.universal-robots.com/articles/ur/application-installation/dealing-with-getinverse-unable-to-find-a-solution/
+
 ROBOT_HOST = "10.0.12.245"
 #usually standard for RTDE and UR robots
 ROBOT_PORT = 30004
@@ -55,16 +62,22 @@ con.connect()
 con.get_controller_version()
 
 # setup recipes
+payload = {
+    "mass": 0.5,  # Mass of the payload
+    "center_of_gravity": [0.0, 0.0, 0.1],  # Center of gravity coordinates
+}
+
+
+#con.send_payload(payload["mass"], payload["center_of_gravity"])
+#con.set_payload(0.5)
+
 con.send_output_setup(state_names, state_types)
 setp = con.send_input_setup(setp_names, setp_types)
 watchdog = con.send_input_setup(watchdog_names, watchdog_types)
 
-# Setpoints to move the robot to
-setp1 = [-0.12, -0.43, 0.14, 0, 3.11, 0.04]
-setp2 = [-0.12, -0.51, 0.21, 0, 3.11, 0.04]
 
-setp.input_double_register_0 = 0
-setp.input_double_register_1 = 0
+setp.input_double_register_0 = pi/2
+setp.input_double_register_1 = -pi/2
 setp.input_double_register_2 = 0
 setp.input_double_register_3 = 0
 setp.input_double_register_4 = 0
@@ -85,12 +98,36 @@ def list_to_setp(sp, list):
         sp.__dict__["input_double_register_%i" % i] = list[i]
     return sp
 
-# Define your setpoints queue
-setpoints_queue = [
-    [0.1, -1.57, -1.57, -1.57, 1.57, 0.0],  # Joint positions for setpoint 1
-    [0.2, -1.57, -1.57, -1.57, 1.57, 0.0],  # Joint positions for setpoint 2
-    [0.3, -1.57, -1.57, -1.57, 1.57, 0.0],  # Joint positions for setpoint 3
-    # Add as many setpoints as you need
+
+a = [0, -0.24365, -0.21325, 0, 0, 0]
+d = [0.1519, 0, 0, 0.11235, 0.08535, 0.0819]
+alpha = [np.pi / 2, 0, 0, np.pi / 2, -np.pi / 2, 0]
+weights = [6, 5, 4, 3, 2, 1]
+
+ikSolver = URIKSolver(a=a, d=d, alpha=alpha, w=weights)
+
+
+# our wanted position x, y, z, roll, pitch, yaw
+position = np.array([0.048, 0.506, -0.255, 2.71, 1.35, 0])
+
+#initial position, joint 1, 2, 3, 4, 5, 6
+#WE HAVE TO FILL IN THE RIGHT INITIAL POSITIN TO GET THE RIGHT SOLUTION
+initialPositionDegrees = [98.08, -149.00, -42.53, -83.97, 88.02, 0]
+#initialPosition = np.array([0, 0, 0, 0, 0, 0])
+initialPosition = np.array([x*pi/180 for x in initialPositionDegrees])
+posEul = [0, 0.3, 0.4, 0, 0, 0]
+posEul2 = [0, -0.3, 0.3, 0, -np.pi, 0]
+#Some for-loop or recursive calling here???:
+
+
+wantedPos1 = ikSolver.solve(posEul, initialPosition)
+wantedPos1[5] = wantedPos1[5] + pi
+
+
+setpoints_queue = [ #angles from joint 1 to the last
+    [1.57, -1.0, 0.5, -0.5, 1.0, 0.0],
+#kSolver.solve(posEul2, wantedPos1)
+    #can add many more.
 ]
 current_setpoint_index = 0
 
@@ -114,7 +151,9 @@ while keep_running:
             new_setp = setpoints_queue[current_setpoint_index]
             current_setpoint_index += 1
             list_to_setp(setp, new_setp)
+            print(f"Moving to setpoint {current_setpoint_index}: {[x*180/pi for x in new_setp]}")
             print(f"Moving to setpoint {current_setpoint_index}: {new_setp}")
+            print(f"")
             # send new setpoint
             con.send(setp)
             watchdog.input_int_register_0 = 1
