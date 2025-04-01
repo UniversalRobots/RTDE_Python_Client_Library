@@ -84,8 +84,8 @@ class UR3Controller(QWidget):
         filename = "../csv_data/jointPaths/jointPath1.csv"
         with open(filename, mode='a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(round(np.radians(self.joint_angles), 3))
-        print(f"Saved current joint angles to {filename}: {round(np.radians(self.joint_angles), 3)}")
+            writer.writerow([float(round(np.radians(x), 3)) for x in self.joint_angles])
+        print(f"Saved current joint angles to {filename}: {[float(round(np.radians(x), 3)) for x in self.joint_angles]}")
 
 
 if __name__ == "__main__":
