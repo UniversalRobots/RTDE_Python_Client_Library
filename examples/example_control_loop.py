@@ -125,7 +125,8 @@ wantedPos1[5] = wantedPos1[5] + pi
 
 
 setpoints_queue = [ #angles from joint 1 to the last
-    [1.57, -1.0, 0.5, -0.5, 1.0, 0.0],
+    [1.5, -1.57, 0.0, -1.57, 1.57, 0.0]
+    #[1.57, -1.0, 0.5, -0.5, 1.0, 0.0],
 #kSolver.solve(posEul2, wantedPos1)
     #can add many more.
 ]
@@ -144,7 +145,6 @@ while keep_running:
     if state is None:
         break
 
-    # do something...
     if move_completed and state.output_int_register_0 == 1:
         if current_setpoint_index < len(setpoints_queue):
             move_completed = False

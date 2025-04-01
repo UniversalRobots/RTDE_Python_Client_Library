@@ -30,18 +30,25 @@ position = np.array([0.048, 0.506, -0.255, 2.71, 1.35, 0])
 #WE HAVE TO FILL IN THE RIGHT INITIAL POSITIN TO GET THE RIGHT SOLUTION
 initialPositionDegrees = [98.08, -149.00, -42.53, -83.97, 88.02, 0]
 #initialPosition = np.array([0, 0, 0, 0, 0, 0])
-initialPosition = np.array([x*pi/180 for x in initialPositionDegrees])
-
+wantedPositionDegrees = [32.66, -91.08, 28.65, -28.65, 57.30, 0]
+wantedposXYZ = [-0.067, -0.2278, 0.40, 0.264, 0.530, -0.986]
 #Some for-loop or recursive calling here???:
+print(f" wanted pos xyz joint angles : {ikSolver.solve(wantedposXYZ, [x*pi/180 for x in wantedPositionDegrees])}")
+print(f" wanted pos xyz position to degrees : {(ikSolver.solve(wantedposXYZ, [x*pi/180 for x in wantedPositionDegrees]))*180/pi}")
+print(f"equal to {[x*pi/180 for x in wantedPositionDegrees]}")
 
+wantedPos3 = ikSolver.solve([0.173, 0.30, 0.20564, pi, 0, 0], [0.57, -1.0, 0.5, -0.5, 1.0, 0.0])
 setpointsQueue = [ #angles from joint 1 to the last
-    [0.5, -1.0, 0.5, -1.5, 1.0, 0], #this worked veery well.
-    [0.57, -1.0, 0.5, -0.5, 1.0, 0.0],
-    #pos x, y, z inputs and then anges in radians
-    ikSolver.solve([0.0, 0.3, 0.3, 0, -pi/2, 0], [0.57, -1.0, 0.5, -0.5, 1.0, 0.0])
+[1.5, -1.57, 0.0, -1.57, 1.57, 0.0],
+[-1.5, -1.57, 0.0, -1.57, 1.57, 0.0]
+    #[0.5, -1.0, 0.5, -1.5, 1.0, 0], #this worked veery well.
+    #[0.57, -1.0, 0.5, -0.5, 1.0, 0.0],
+    #[x*pi/180 for x in wantedPositionDegrees], #pos x, y, z inputs and then anges in radians
+#(ikSolver.solve(wantedposXYZ, [x*pi/180 for x in wantedPositionDegrees])),
 #kSolver.solve(posEul2, wantedPos1)
     #can add many more.
 ]
+print(f"the 3rd command: {ikSolver.solve([0.0, 0.3, 0.3, 0, -pi/2, 0], [0.57, -1.0, 0.5, -0.5, 1.0, 0.0])}")
 
 try:
     print(f"Connecting to robot at {HOST}:{PORT}...")
@@ -50,10 +57,9 @@ try:
     print("Connection established!")
 
     for i in range(len(setpointsQueue)):
-        command = f"movej({setpointsQueue[i]}, a=1.4, v=1.0)"
-        print(f"Sending command: {command.strip()}")
-        s.send(command.encode('utf8'))  # Send URScript command via socket
-
+        command = f"movej({[round(p, 3) for p in setpointsQueue[i]]}, a=1.4, v=1.0)" + "\n"
+        s.send(command.encode('utf8'))
+        print(f"nr {i+1} executed")
         time.sleep(5)
 
     print("All setpoints sent successfully!")
@@ -61,9 +67,8 @@ try:
     s.close()
 
 except socket.error as msg:
-    # Handle socket connection errors gracefully
     print(f"Could not connect to the robot at {HOST}:{PORT}. Error: {msg}")
-    sys.exit(1)  # Terminate the program if connection fails
+    sys.exit(1)
 
 except Exception as e:
     # Handle any other unexpected exceptions
