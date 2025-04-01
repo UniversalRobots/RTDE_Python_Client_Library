@@ -24,7 +24,8 @@ PORT = 30002
 class UR3Controller(QWidget):
     def __init__(self):
         super().__init__()
-        self.joint_angles = [90, -90, 0, -90, 90, 0]
+        # 114, -98, -105, -75, 90, 0
+        self.joint_angles = [114, -98, -105, -75, 90, 0]
 
         self.initUI()
 
@@ -40,7 +41,7 @@ class UR3Controller(QWidget):
             slider.setMaximum(180)
             slider.setValue(self.joint_angles[i])
             slider.setTickInterval(1)
-            slider.valueChanged.connect(self.update_value)
+            slider.valueChanged.connect(self.updateValue)
 
             self.labels.append(label)
             self.sliders.append(slider)
@@ -49,43 +50,42 @@ class UR3Controller(QWidget):
             layout.addWidget(slider)
 
         self.save_button = QPushButton("Save setpoint to CSV")
-        self.save_button.clicked.connect(self.save_to_csv)
+        self.save_button.clicked.connect(self.saveToCsv)
         layout.addWidget(self.save_button)
 
         self.setLayout(layout)
         self.setWindowTitle("UR3 Joint Control")
         self.setGeometry(200, 200, 400, 300)
 
-    def update_value(self):
+    def updateValue(self):
         self.joint_angles = [slider.value() for slider in self.sliders]
         for i, label in enumerate(self.labels):
             label.setText(f"Joint {i + 1}: {self.joint_angles[i]}°")
 
-        self.send_robot_command()
+        self.sendRobotCommand()
 
-    def send_robot_command(self):
+    def sendRobotCommand(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((HOST, PORT))
             print("Connected to robot!")
-
-            #converting from python floats to
-            joint_radians = [float(round(np.radians(angle), 3)) for angle in self.joint_angles]
-            print(f"joint_radians = {joint_radians}")
-            command = f"movej({joint_radians}, a=1.4, v=1.0)\n"
+            #converting from numpy float to normal float
+            JointRadians = [float(round(np.radians(angle), 3)) for angle in self.joint_angles]
+            print(f"JointRadians = {JointRadians}")
+            command = f"movej({JointRadians}, a=1.4, v=1.0)\n"
             s.send(command.encode('utf-8'))
-            print(f"Sent command: {command}")
+            #print(f"Sent command: {command}")
 
             s.close()
         except socket.error as e:
             print(f"Connection error: {e}")
 
-    def save_to_csv(self):
-        filename = "joint_angles.csv"
-        with open(filename, mode='a', newline='') as file:  # 'a' = append mode
+    def saveToCsv(self):
+        filename = "../csv_data/jointPaths/jointPath1.csv"
+        with open(filename, mode='a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(self.joint_angles)
-        print(f"Saved current joint angles to {filename}: {self.joint_angles}")
+            writer.writerow(round(np.radians(self.joint_angles), 3))
+        print(f"Saved current joint angles to {filename}: {round(np.radians(self.joint_angles), 3)}")
 
 
 if __name__ == "__main__":
