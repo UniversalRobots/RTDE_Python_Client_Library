@@ -25,7 +25,7 @@ class UR3Controller(QWidget):
     def __init__(self):
         super().__init__()
         # 114, -98, -105, -75, 90, 0
-        self.joint_angles = [114, -98, -105, -75, 90, 0]
+        self.joint_angles = [114, -90, -105, -75, 90, 0]
 
         self.initUI()
 
@@ -37,10 +37,10 @@ class UR3Controller(QWidget):
         for i in range(6):
             label = QLabel(f"Joint {i + 1}: {self.joint_angles[i]}°")
             slider = QSlider(Qt.Orientation.Horizontal)
-            slider.setMinimum(-180)
-            slider.setMaximum(180)
-            slider.setValue(self.joint_angles[i])
-            slider.setTickInterval(1)
+            slider.setMinimum(-180 * 4)  # Skalerer verdiene opp
+            slider.setMaximum(180 * 4)
+            slider.setValue(self.joint_angles[i] * 4)
+            slider.setTickInterval(1)  # Ett hakk = 0.25 grader
             slider.valueChanged.connect(self.updateValue)
 
             self.labels.append(label)
@@ -58,7 +58,7 @@ class UR3Controller(QWidget):
         self.setGeometry(200, 200, 400, 300)
 
     def updateValue(self):
-        self.joint_angles = [slider.value() for slider in self.sliders]
+        self.joint_angles = [slider.value() / 4.0 for slider in self.sliders]
         for i, label in enumerate(self.labels):
             label.setText(f"Joint {i + 1}: {self.joint_angles[i]}°")
 
@@ -81,7 +81,7 @@ class UR3Controller(QWidget):
             print(f"Connection error: {e}")
 
     def saveToCsv(self):
-        filename = "../csv_data/jointPaths/jointPath1.csv"
+        filename = "../csv_data/jointPaths/jointPathMagLev28.csv"
         with open(filename, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([float(round(np.radians(x), 3)) for x in self.joint_angles])
