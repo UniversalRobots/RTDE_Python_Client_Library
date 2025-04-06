@@ -43,7 +43,7 @@ def sendRobotJointData(host, port, csvFilePath, velocity, acceleration, delay):
 if __name__ == "__main__":
     robotIp = "10.0.12.245"
     port = 30003
-    CSVFILE = "../csv_data/jointPaths/jointPath1.csv"
+    CSVFILE = "../csv_data/jointPaths/jointPathMagLev28.csv"
 
     sendRobotJointData(robotIp, port, CSVFILE, velocity=1.0, acceleration=1.4, delay=2)
 

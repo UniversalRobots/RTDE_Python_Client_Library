@@ -18,18 +18,18 @@ import rtde.rtde_config as rtde_config
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--host", default="192.168.0.100", help="Robot IP")
+parser.add_argument("--host", default="10.0.12.245", help="Robot IP")
 parser.add_argument("--port", type=int, default=30004, help="Port number")
 parser.add_argument("--frequency", type=int, default=125, help="Sampling frequency")
-parser.add_argument("--config", default="../xmlData/record_configuration.xml", help="Config file")
+parser.add_argument("--config", default="../xmlDataReader/record_configuration.xml", help="Config file")
 
 
 # ------------------------------
 # Fill in CSV data file locations here
 # ------------------------------
 
-parser.add_argument("--output_rtde", default="../csv_data/jointDataInSync.csv", help="Robot Output CSV")
-parser.add_argument("--output_arduino", default="../csv_data/arduinoDataInSync.csv", help="Arduino Output CSV")
+parser.add_argument("--output_rtde", default="../csv_data/jointDataInSync0404.csv", help="Robot Output CSV")
+parser.add_argument("--output_arduino", default="../csv_data/arduinoDataInSync0404.csv", help="Arduino Output CSV")
 
 #------------------------------------------
 # Fill inn arduino com serial port under here
