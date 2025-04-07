@@ -17,8 +17,8 @@ import pandas as pd
 from scipy.interpolate import interp1d
 
 # Load data
-robot_df = pd.read_csv("../csv_data/XYZEuler0404Data.csv").sort_values("timestamp")
-arduino_df = pd.read_csv("../csv_data/arduinoDataInSync0404.csv").sort_values("timestamp")
+robot_df = pd.read_csv("../csv_data/XYZEulerA0704Data.csv").sort_values("timestamp")
+arduino_df = pd.read_csv("../csv_data/arduinoDatSync0704.csv").sort_values("timestamp")
 
 robot_time = robot_df["timestamp"].values
 arduino_time = arduino_df["timestamp"].values
@@ -30,8 +30,7 @@ arduino_time_aligned = arduino_time - time_offset
 print(f"arduino time is {arduino_time[-1]-arduino_time[0]}")
 print(f"robot time is {robot_time[-1]-robot_time[0]}")
 
-"""
-/*
+
 # Verify alignment
 print(f"Robot timestamps: {robot_time.min()} to {robot_time.max()}")
 print(f"Aligned Arduino timestamps: {arduino_time_aligned.min()} to {arduino_time_aligned.max()}")
@@ -56,6 +55,5 @@ aligned_data = pd.DataFrame({
     **interpolated
 })
 
-aligned_data.to_csv("alignedDatasets/alingedData0404.csv", index=False)
+aligned_data.to_csv("alignedDatasets/alingedNewData0704.csv", index=False)
 print("Success! Output shape:", aligned_data.shape)
-*/"""

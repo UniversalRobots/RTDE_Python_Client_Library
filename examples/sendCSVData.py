@@ -46,6 +46,8 @@ if __name__ == "__main__":
     port = 30003
     CSVFILE = "../csv_data/jointPaths/jointPathMagLev28.csv"
 
-    sendRobotJointData(robotIp, port, CSVFILE, velocity=1.0, acceleration=1.4, delay=5)
+    sendRobotJointData(robotIp, port, CSVFILE, velocity=1.0, acceleration=1.4, delay=2)
 
     sendRobotJointData(robotIp, port, CSVFILE, velocity=0.3, acceleration=0.7, delay=4)
+
+    sendRobotJointData(robotIp, port, CSVFILE, velocity=0.3, acceleration=0.7, delay=6)
