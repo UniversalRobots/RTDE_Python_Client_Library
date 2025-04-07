@@ -28,7 +28,8 @@ def sendRobotJointData(host, port, csvFilePath, velocity, acceleration, delay):
 
 
                         command = f"movej({angleRow}, a={acceleration}, v={velocity})\n"
-                        #command = f"movej({angleRow}, a=1.4, v=1.0)\n"
+                        print("Sending command: ", command)
+                        print("Now sending command: ", command)
                         s.send(command.encode('utf-8'))
 
                         #time.sleep(2)
@@ -45,6 +46,6 @@ if __name__ == "__main__":
     port = 30003
     CSVFILE = "../csv_data/jointPaths/jointPathMagLev28.csv"
 
-    sendRobotJointData(robotIp, port, CSVFILE, velocity=1.0, acceleration=1.4, delay=2)
+    sendRobotJointData(robotIp, port, CSVFILE, velocity=1.0, acceleration=1.4, delay=5)
 
     sendRobotJointData(robotIp, port, CSVFILE, velocity=0.3, acceleration=0.7, delay=4)
