@@ -12,61 +12,50 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 
-robot_df = pd.read_csv("robot_data.csv")
+import numpy as np
+import pandas as pd
+from scipy.interpolate import interp1d
+
+# Load data
+robot_df = pd.read_csv("../csv_data/XYZEuler0404Data.csv").sort_values("timestamp")
+arduino_df = pd.read_csv("../csv_data/arduinoDataInSync0404.csv").sort_values("timestamp")
+
 robot_time = robot_df["timestamp"].values
-robot_X = robot_df["X"].values
-robot_Y = robot_df["Y"].values
-robot_Z = robot_df["Z"].values
-robot_Roll = robot_df["Roll"].values
-robot_Pitch = robot_df["Pitch"].values
-robot_Yaw = robot_df["Yaw"].values
-
-
-#headers:
-#sensor1_x,sensor1_y,sensor1_z,sensor2_x,sensor2_y,sensor2_z,sensor3_x,sensor3_y,sensor3_z,ux,uy
-arduino_df = pd.read_csv("arduino_data.csv")
 arduino_time = arduino_df["timestamp"].values
-arduino_sensor1_x = arduino_df["sensor1_x"].values
-arduino_sensor1_y = arduino_df["sensor1_y"].values
-arduino_sensor1_z = arduino_df["sensor1_z"].values
-arduino_sensor2_x = arduino_df["sensor2_x"].values
-arduino_sensor2_y = arduino_df["sensor2_y"].values
-arduino_sensor2_z = arduino_df["sensor2_z"].values
-arduino_sensor3_x = arduino_df["sensor3_x"].values
-arduino_sensor3_y = arduino_df["sensor3_y"].values
-arduino_sensor3_z = arduino_df["sensor3_z"].values
-
-arduino_sensor3_y = arduino_df["ux"].values
-arduino_sensor3_z = arduino_df["sensor3_z"].values
-# ... (other sensor columns)
 
 
-interp_X = interp1d(robot_time, robot_X, kind='linear', fill_value='extrapolate')
-interp_Y = interp1d(robot_time, robot_Y, kind='linear', fill_value='extrapolate')
-interp_Z = interp1d(robot_time, robot_Z, kind='linear', fill_value='extrapolate')
-interp_Roll = interp1d(robot_time, robot_Roll, kind='linear', fill_value='extrapolate')
-interp_Pitch = interp1d(robot_time, robot_Pitch, kind='linear', fill_value='extrapolate')
-interp_Yaw = interp1d(robot_time, robot_Yaw, kind='linear', fill_value='extrapolate')
+time_offset = arduino_time[0] - robot_time[0]
+arduino_time_aligned = arduino_time - time_offset
 
-X_interp = interp_X(arduino_time)
-Y_interp = interp_Y(arduino_time)
-Z_interp = interp_Z(arduino_time)
-Roll_interp = interp_Roll(arduino_time)
-Pitch_interp = interp_Pitch(arduino_time)
-Yaw_interp = interp_Yaw(arduino_time)
+print(f"arduino time is {arduino_time[-1]-arduino_time[0]}")
+print(f"robot time is {robot_time[-1]-robot_time[0]}")
 
+"""
+/*
+# Verify alignment
+print(f"Robot timestamps: {robot_time.min()} to {robot_time.max()}")
+print(f"Aligned Arduino timestamps: {arduino_time_aligned.min()} to {arduino_time_aligned.max()}")
 
+overlap = (arduino_time_aligned >= robot_time.min()) & (arduino_time_aligned <= robot_time.max())
+if not np.any(overlap):
+    print("ERROR: No overlap after alignment!")
+    exit()
+
+arduino_time_aligned = arduino_time_aligned[overlap]
+arduino_df = arduino_df.iloc[overlap]
+
+interpolated = {}
+for col in ["X", "Y", "Z", "Roll", "Pitch", "Yaw"]:
+    interp_func = interp1d(robot_time, robot_df[col].values, kind='linear', fill_value="extrapolate")
+    interpolated[col] = interp_func(arduino_time_aligned)
+
+# Combine DataFrames
 aligned_data = pd.DataFrame({
-    "timestamp": arduino_time,
-    "sensor1_x": arduino_sensor1_x,
-    "sensor1_y": arduino_sensor1_y,
-    # ... (other sensor columns)
-    "X": X_interp,
-    "Y": Y_interp,
-    "Z": Z_interp,
-    "Roll": Roll_interp,
-    "Pitch": Pitch_interp,
-    "Yaw": Yaw_interp
+    "timestamp": arduino_time_aligned,
+    **{col: arduino_df[col].values for col in arduino_df.columns if col != "timestamp"},
+    **interpolated
 })
 
-aligned_data.to_csv("aligned_dataset.csv", index=False)
+aligned_data.to_csv("alignedDatasets/alingedData0404.csv", index=False)
+print("Success! Output shape:", aligned_data.shape)
+*/"""

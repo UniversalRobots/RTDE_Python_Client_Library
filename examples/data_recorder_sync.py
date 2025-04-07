@@ -24,12 +24,12 @@ parser.add_argument("--frequency", type=int, default=125, help="Sampling frequen
 parser.add_argument("--config", default="../xmlDataReader/record_configuration.xml", help="Config file")
 
 
-# ------------------------------
-# Fill in CSV data file locations here
-# ------------------------------
 
-parser.add_argument("--output_rtde", default="../csv_data/jointDataInSync0404.csv", help="Robot Output CSV")
-parser.add_argument("--output_arduino", default="../csv_data/arduinoDataInSync0404.csv", help="Arduino Output CSV")
+
+
+#   Output file
+parser.add_argument("--output_rtde", default="../csv_data/jointDatSync0704.csv", help="Robot Output CSV")
+parser.add_argument("--output_arduino", default="../csv_data/arduinoDatSync0704.csv", help="Arduino Output CSV")
 
 #------------------------------------------
 # Fill inn arduino com serial port under here
@@ -98,7 +98,7 @@ async def read_arduino():
         writer = csv.writer(csvfile)
         # TODO:
         # TODO: FIX::::
-        writer.writerow(["timestamp", "sensor1_x", "sensor1_y"])
+        writer.writerow(["timestamp", "sensor1_x", "sensor1_y", "sensor1_z", "sensor2_x", "sensor2_y", "sensor2_z", "sensor3_x", "sensor3_y", "sensor3_z", "ux", "uy"])
 
         # Use create_serial_connection with protocol
         transport, protocol = await serial_asyncio.create_serial_connection(
@@ -119,8 +119,8 @@ async def read_arduino():
 # ------------------------------
 async def main():
     task1 = asyncio.create_task(collect_rtde_data())
-    task2 = asyncio.create_task(read_arduino())       # Arduino Serial Reading
-    await asyncio.gather(task1, task2)               # Run both concurrently
+    task2 = asyncio.create_task(read_arduino())
+    await asyncio.gather(task1, task2)
 
 
 # ------------------------------
