@@ -3,153 +3,112 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
-import torch.onnx
-import onnx
-import numpy as np
+from numpy import size
 from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 
-
-print("ONNX version:", onnx.__version__)  # Should output "1.15.0"
-print("Protobuf version:", onnx.__version__)  # Should match 3.20.x
-
-
-
-#importand note: "Latest PyTorch requires Python 3.9 or later."
-print(torch.cuda.is_available())
-
-if torch.cuda.is_available():
-    device = torch.device('cuda')  # Use GPU
-else:
-    device = torch.device('cpu')   # Use CPU
+# Device setup (simplified)
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
 
 
+def load_data(filepath):
+    data = np.loadtxt(filepath, delimiter=",", skiprows=1)
+    X = data[:, 1:12]  # Sensor inputs (columns 1-11)
+    Y = data[:, 12:17]  # Coordinates (X,Y,Z,Roll,Pitch)
+    return X, Y
 
-#https://www.youtube.com/watch?v=Xp0LtPBcos0&t=1s
-#https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
-#https://machinelearningmastery.com/develop-your-first-neural-network-with-pytorch-step-by-step/
-#hiddel layers:
-# "https://www.linkedin.com/pulse/choosing-number-hidden-layers-neurons-neural-networks-sachdev/"
 
-data = np.loadtxt("alignedDatasets/alingedNewData0704.csv", delimiter=",", skiprows=1)  # Load CSV data
-#The two last are coil output
-nestInline = 3
+X, Y = load_data("alignedDatasets/alignedData_interpolated0704.csv")
 
-#setup: "timestamp,sensor1_x,sensor1_y,sensor1_z,sensor2_x,sensor2_y,sensor2_z,sensor3_x,sensor3_y,sensor3_z,ux,uy,X,Y,Z,Roll,Pitch,Yaw"
-X = data[:, [1,2,3,4,5,6,7,8,9,10,11]]
-#number 1 is the clock
-# X, Y, Z, Roll and Pitch
-Y = data[:, [12,13,14,15,16]]
-print(f"here is Input/Hall effect data: {X}")
-print(f"here is Y/Real coordinates: {Y}")
-print(Y)
+print("X:")
+print(size(X))
+print(f"with length: {len(X[0])}")
 
-print(X)
-print("This was the first rows of data data")
-print(Y)
-print("This was the first rows of data data")
+print("Y")
+print(size(Y))
+print(f"with length: {len(Y[0])}")
 
-# Convert to PyTorch tensors
-X_train = torch.tensor(X, dtype=torch.float32)
-Y_train = torch.tensor(Y, dtype=torch.float32)
 
-# Define the Neural Network
+X = (X - X.mean(axis=0)) / X.std(axis=0)
+Y = (Y - Y.mean(axis=0)) / Y.std(axis=0)
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+train_dataset = TensorDataset(torch.FloatTensor(X_train), torch.FloatTensor(Y_train))
+test_dataset = TensorDataset(torch.FloatTensor(X_test), torch.FloatTensor(Y_test))
+
+batch_size = 64
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=batch_size)
+
+
+# Model Definition (simplified with Sequential)
 class MappingNN(nn.Module):
     def __init__(self):
-        super(MappingNN, self).__init__()
-        self.fc1 = nn.Linear(11, 64)  # Input: 11 features
-        self.bn1 = nn.BatchNorm1d(64)  # Batch norm
-        self.fc2 = nn.Linear(64, 32)
-        self.bn2 = nn.BatchNorm1d(32)
-        self.fc3 = nn.Linear(32, 5)   # Output: 5 (X,Y,Z,Roll,Pitch)
-        self.dropout = nn.Dropout(0.2)  # Optional: Regularization
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(11, 32),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(32, 16),
+            nn.ReLU(),
+            nn.Linear(16, 5)
+        )
 
     def forward(self, x):
-        x = torch.relu(self.bn1(self.fc1(x)))
-        x = self.dropout(x)  # Optional
-        x = torch.relu(self.bn2(self.fc2(x)))
-        x = self.fc3(x)
-        return x
-# Initialize and Train
-model = MappingNN()
+        return self.net(x)
+
+
+model = MappingNN().to(device)
 criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# Training Loop
-#can define ouself how many epochs we want right??
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
-
-X_train = torch.tensor(X_train, dtype=torch.float32)
-Y_train = torch.tensor(Y_train, dtype=torch.float32)
-X_test = torch.tensor(X_test, dtype=torch.float32)
-Y_test = torch.tensor(Y_test, dtype=torch.float32)
-
-best_loss = float('inf')
-patience = 20
-no_improve = 0
-
-for epoch in range(500):
+# Training Loop (fixed)
+num_epochs = 500
+for epoch in range(num_epochs):
     model.train()
-    optimizer.zero_grad()
-    output = model(X_train)
-    loss = criterion(output, Y_train)
-    loss.backward()
-    optimizer.step()
+    epoch_loss = 0.0
+
+    for batch_x, batch_y in train_loader:
+        batch_x, batch_y = batch_x.to(device), batch_y.to(device)
+
+        optimizer.zero_grad()
+        outputs = model(batch_x)
+        loss = criterion(outputs, batch_y)
+        loss.backward()
+        optimizer.step()
+
+        epoch_loss += loss.item()
 
     # Validation
     model.eval()
+    val_loss = 0.0
     with torch.no_grad():
-        val_output = model(X_test)
-        val_loss = criterion(val_output, Y_test)
-
-    # Early stopping check
-    if val_loss < best_loss:
-        best_loss = val_loss
-        no_improve = 0
-    else:
-        no_improve += 1
-        if no_improve >= patience:
-            print(f"Early stopping at epoch {epoch}")
-            break
+        for batch_x, batch_y in test_loader:
+            batch_x, batch_y = batch_x.to(device), batch_y.to(device)
+            outputs = model(batch_x)
+            val_loss += criterion(outputs, batch_y).item()
 
     if epoch % 50 == 0:
-        print(f"Epoch {epoch}: Train Loss = {loss.item()}, Val Loss = {val_loss.item()}")
+        avg_train_loss = epoch_loss / len(train_loader)
+        avg_val_loss = val_loss / len(test_loader)
+        print(f"Epoch {epoch}: Train Loss = {avg_train_loss:.4f}, Val Loss = {avg_val_loss:.4f}")
 
-# Save the model
-#torch.save(model.state_dict(), "mapped_models/mapped_model_sensorA0_and_A1.pth")
+# Save model
+torch.save(model.state_dict(), "mappedModels/mapped_model_sensorA0_and_A1.pth")
 
-#use double instead??
-#11 for 11 inputs
-dummy_input = torch.randn(1, 11, dtype=torch.float32)
-
-
-
-print("Layer fc1 Weights:\n", model.fc1.weight.data)
-print("Layer fc1 Bias:\n", model.fc1.bias.data)
-
-print("Layer fc2 Weights:\n", model.fc2.weight.data)
-print("Layer fc2 Bias:\n", model.fc2.bias.data)
-
-print("Layer fc3 Weights:\n", model.fc3.weight.data)
-print("Layer fc3 Bias:\n", model.fc3.bias.data)
-
-for name, param in model.named_parameters():
-    print(f"{name}: {param.data}")
-
-
-# Generate computation graph visualization
-#sample_input = torch.randn(1, 3)  # Match input dimensions
-#output = model(sample_input)
-#make_dot(output, params=dict(model.named_parameters())).render("nn_architecture", format="png")
-
-
+# ONNX Export (improved)
+dummy_input = torch.randn(1, 11, dtype=torch.float32).to(device)
 torch.onnx.export(
-    model,                       # Trained model
-    dummy_input,                 # Example input
-    "mappedModels/HEToCoordinates.onnx",
+    model,
+    dummy_input,
+    "mappedModels/inputOutput07042025.onnx",
     opset_version=20,
-    #verbose=False,
     input_names=["input"],
     output_names=["output"],
-    dynamic_axes={"input": {0: "batch"}, "output": {0: "batch"}},  # Support variable batch size
+    dynamic_axes={
+        "input": {0: "batch"},
+        "output": {0: "batch"}
+    }
 )
