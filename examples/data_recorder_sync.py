@@ -28,8 +28,8 @@ parser.add_argument("--config", default="../xmlDataReader/record_configuration.x
 
 
 #   Output files
-parser.add_argument("--output_rtde", default="../csv_data/jointDatNoOutput0704.csv", help="Robot Output CSV")
-parser.add_argument("--output_arduino", default="../csv_data/arduinoDatNoOutPut0704.csv", help="Arduino Output CSV")
+parser.add_argument("--output_rtde", default="../csv_data/jointDatWOuP1404dataset3.csv", help="Robot Output CSV")
+parser.add_argument("--output_arduino", default="../csv_data/arduinoDatWOuP1404dataset3.csv", help="Arduino Output CSV")
 
 #------------------------------------------
 # Fill inn arduino com serial port under here
@@ -96,8 +96,6 @@ async def collect_rtde_data():
 async def read_arduino():
     with open(args.output_arduino, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        # TODO:
-        # TODO: FIX::::
         writer.writerow(["timestamp", "sensor1_x", "sensor1_y", "sensor1_z", "sensor2_x", "sensor2_y", "sensor2_z", "sensor3_x", "sensor3_y", "sensor3_z", "ux", "uy"])
 
         # Use create_serial_connection with protocol

@@ -12,8 +12,8 @@ import pandas as pd
 from scipy.interpolate import interp1d
 
 # Load and sort data
-robot_df = pd.read_csv("../csv_data/XYZEulNOOUPP0704Data.csv").sort_values("timestamp")
-arduino_df = pd.read_csv("../csv_data/arduinoDatNoOutPut0704.csv").sort_values("timestamp")
+robot_df = pd.read_csv("../csv_data/xyzEulerWOuP1404dataset3.csv").sort_values("timestamp")
+arduino_df = pd.read_csv("../csv_data/arduinoDatWOuP1404dataset3.csv").sort_values("timestamp")
 
 robot_time = robot_df["timestamp"].values
 arduino_time = arduino_df["timestamp"].values
@@ -50,12 +50,12 @@ aligned_data = pd.DataFrame({
     **interpolated_robot
 })
 
-aligned_data.to_csv("alignedDatasets/alignedInterpoaNoOutPut0704.csv", index=False)
+aligned_data.to_csv("alignedDatasets/alignedWithOP1404Dataset3.csv", index=False)
 print(f"Success! Aligned {len(aligned_data)} samples")
 print(f"Arduino/robot ratio: {len(aligned_data)/len(robot_df):.1f}x")
 
 
-resultFile = pd.read_csv("alignedDatasets/alignedInterpoaNoOutPut0704.csv").sort_values("timestamp")
+resultFile = pd.read_csv("alignedDatasets/alignedWithOP1404Dataset3.csv").sort_values("timestamp")
 
 
 resultFileTimes = robot_df["timestamp"].values

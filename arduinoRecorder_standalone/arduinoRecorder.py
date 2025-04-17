@@ -16,14 +16,14 @@ parser = argparse.ArgumentParser()
 # ------------------------------
 # Fill in CSV data file locations here
 # ------------------------------
-parser.add_argument("--output_arduino", default="../csv_data/standalone_arduino_data/arduinoTrainingCalm25032025.csv", help="Arduino Output CSV")
+parser.add_argument("--output_arduino", default="../csv_data/standalone_arduino_data/hallEffect/SSdataWithAllSensors15042025.csv", help="Arduino Output CSV")
 
 #------------------------------------------
 # Fill in arduino com serial port under here
 #------------------------------------------
 parser.add_argument("--serial_port", default="COM12", help="Arduino Serial Port")
 
-parser.add_argument("--baud_rate", type=int, default=9600, help="Arduino Baud Rate")
+parser.add_argument("--baud_rate", type=int, default=115200, help="Arduino Baud Rate")
 parser.add_argument("--verbose", action="store_true", help="Verbose output")
 args = parser.parse_args()
 

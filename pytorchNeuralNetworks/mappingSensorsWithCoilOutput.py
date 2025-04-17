@@ -23,7 +23,7 @@ print(f"ONNX version: {onnx.__version__}")
 #https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
 #https://machinelearningmastery.com/develop-your-first-neural-network-with-pytorch-step-by-step/
 # Load your recorded data
-data = np.loadtxt("../csv_data/standalone_arduino_data/arduinoTrainingCalm25032025.csv", delimiter=",", skiprows=1)  # Load CSV data
+data = np.loadtxt("../csv_data/standalone_arduino_data/hallEffect/arduinoTrainingCalm25032025.csv", delimiter=",", skiprows=1)  # Load CSV data
 #The two last are coil output
 nestInline = 3
 X = data[:, [4+0, 5+0, 6+0, 9, 10]]

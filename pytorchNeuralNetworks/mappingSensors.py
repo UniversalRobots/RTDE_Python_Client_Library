@@ -23,7 +23,7 @@ print(f"ONNX version: {onnx.__version__}")
 #https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
 #https://machinelearningmastery.com/develop-your-first-neural-network-with-pytorch-step-by-step/
 # Load your recorded data
-data = np.loadtxt("../csv_data/standalone_arduino_data/arduinoTraining25032025.csv", delimiter=",", skiprows=1)  # Load CSV data
+data = np.loadtxt("../csv_data/standalone_arduino_data/hallEffect/arduinoTraining25032025.csv", delimiter=",", skiprows=1)  # Load CSV data
 Y = data[:, 1:4]  # 2nd to the 4th columns of sensor data
 X = data[:, 4+3:7+3]  # 5th to the 8th columns of sensor data
 
