@@ -136,7 +136,7 @@ for epoch in range(epochs):
     # Put the model in training mode at the beginning of an epoch
     model.train()
 
-    # 1. Fwd pass
+
     y_pred = model(X_train)
 
     # 2. Calculate loss

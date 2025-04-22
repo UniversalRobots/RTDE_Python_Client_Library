@@ -4,25 +4,35 @@ import pandas as pd
 #https://www.geeksforgeeks.org/use-pandas-to-calculate-stats-from-an-imported-csv-file/
 
 
-df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeuralWithUxUy.csv')
+df = pd.read_csv('../csv_data/standalone_arduino_data/hallEffect/SSdataWithAllSensors15042025.csv')
 
 
-#csv file columns: Timestamp,X,Y,Z,Roll,Pitch,ux,uy
+#csv file columns: timestamp,sensor1_x,sensor1_y,sensor1_z,sensor2_x,sensor2_y,sensor2_z,sensor3_x,sensor3_y,sensor3_z,ux,uy
 
 #meanX =df['X'].mean()
 #print('Mean Value of X: '+str(meanX))
 def findMean(file,variableStr):
-    mean = df[variableStr].mean()
+    mean = file[variableStr].mean()
     print(f'Mean Value of {variableStr} is: {mean}')
     return mean
 
-variables = ['X', 'Y', 'Roll', 'Pitch']
+def findStd(file,variableStr):
+    std = file[variableStr].std()
+    print(f'Mean Value of {variableStr} is: {std}')
+    return std
 
-for var in variables:
-    findMean(file=df,variableStr=var)
+
+def findVariance(file,variableStr):
+    variance = file[variableStr].var()
+    print(f'Mean Value of {variableStr} is: {variance}')
+    return variance
+
+sensorData = ['sensor1_x','sensor1_y', 'sensor1_z', 'sensor2_x', 'sensor2_y', 'sensor2_z', 'sensor3_x', 'sensor3_y', 'sensor3_z']
+
+for sd in sensorData:
+    findMean(file=df,variableStr=sd)
+    df['sensor1_x'].variance()
 
 
-dfCalibrated = df.copy()
-dfCalibrated[variables] = df[variables] - df[variables].mean()
 
-dfCalibrated.to_csv('meanCalibrated_file.csv', index=False)
+
