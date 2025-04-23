@@ -127,13 +127,11 @@ for epoch in range(5000):
 
 """
 
-# 1. Normalize your data (strongly recommended)
 X_mean, X_std = X.mean(axis=0), X.std(axis=0)
 Y_mean, Y_std = Y.mean(axis=0), Y.std(axis=0)
 X = (X - X_mean) / (X_std + 1e-8)
 Y = (Y - Y_mean) / (Y_std + 1e-8)
 
-# 2. Verify shapes before training
 #print("Input shape:", X_train.shape)
 #print("Output shape:", Y_train.shape)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
