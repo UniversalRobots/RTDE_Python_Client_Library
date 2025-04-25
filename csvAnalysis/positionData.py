@@ -6,11 +6,11 @@ import pandas as pd
 #sources:
 #https://www.geeksforgeeks.org/use-pandas-to-calculate-stats-from-an-imported-csv-file/
 
-
-df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeuralWithUxUy.csv')
-
+#Remembter
+df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeuralWUxUy25__04__2025.csv')
+#C:/Users/hanur/Documents/UNIVERSITY/pythonProjects/RTDEPythonClientLibraryMagLev/csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeuralWUxUy25__04__2025.csv
 addDerivatives = True
-
+itsMictoSecUnit = True
 #csv file columns: Timestamp,X,Y,Z,Roll,Pitch,ux,uy
 
 #meanX =df['X'].mean()
@@ -55,7 +55,13 @@ for var in variables:
 
 dfCalibrated = df.copy()
 dfCalibrated[variables] = df[variables] - df[variables].mean()
-dfCalibrated['dt'] = df['Timestamp'].diff()
+
+if (itsMictoSecUnit):
+    dfCalibrated['Timestamp'] = df['Timestamp']/(10**6)
+    for i in range(0, len(dfCalibrated['Timestamp'])):
+        dfCalibrated['Timestamp'] = dfCalibrated['Timestamp'] - dfCalibrated.loc[0,'Timestamp']
+
+dfCalibrated['dt'] = dfCalibrated['Timestamp'].diff()
 
 print(dfCalibrated['dt'])
 
@@ -65,7 +71,7 @@ dfCalibrated['dt'].values[0] = 0
 
 
 #Using the mean dt
-meanDt = (df['Timestamp'] - df['Timestamp'][0]).diff().mean()
+meanDt = (dfCalibrated['Timestamp'] - dfCalibrated['Timestamp'][0]).diff().mean()
 dfCalibrated['dt'] = meanDt
 
 print('mean_dt', meanDt)
@@ -91,7 +97,7 @@ mask = ~(dfCalibrated[deltaCols].fillna(0) == 0).all(axis=1)
 dfCalibrated = dfCalibrated[mask].reset_index(drop=True)
 
 
-meanDt = (df['Timestamp'] - df['Timestamp'][0]).diff().mean()
+meanDt = (dfCalibrated['Timestamp'] - dfCalibrated['Timestamp'][0]).diff().mean()
 dfCalibrated['dt'] = meanDt
 
 
@@ -109,7 +115,7 @@ for var in deltaCols:
 
 print(dfCalibrated)
 
-dfCalibrated.to_csv('../csv_data/standalone_arduino_data/xyzEuler/calibrated/calibratedPOS1704.csv', index=False)
+dfCalibrated.to_csv('../csv_data/standalone_arduino_data/xyzEuler/calibrated/calibrated25__04__2025.csv', index=False)
 
 
 

@@ -15,10 +15,9 @@ def load_data(filepath):
 
 def predict(model, input_data):
 
-    # make sure the model is in evaluation mode
+
     model.eval()
 
-    # Convert input to tensor
     if not isinstance(input_data, torch.Tensor):
         input_data = torch.from_numpy(input_data).float()
 
@@ -77,10 +76,13 @@ class Model_comp(nn.Module):
 
         self.ll2 = nn.Linear(in_features=int(8 * additionalfactor), out_features=int(32 * additionalfactor))
         self.bn2 = nn.BatchNorm1d(int(32 * additionalfactor))  # BatchNorm added
+        #self.ac2 = nn.ReLU()
+        # self.ac3 = nn.ReLU()
         self.ac2 = nn.Tanh()
 
         self.ll3 = nn.Linear(in_features=int(32 * additionalfactor), out_features=(16 * additionalfactor))
         self.bn3 = nn.BatchNorm1d(int(16 * additionalfactor))  # BatchNorm added
+        #self.ac3 = nn.ReLU()
         self.ac3 = nn.Tanh()
 
         self.ll4 = nn.Linear(in_features=(16 * additionalfactor), out_features=(4 * additionalfactor))
@@ -166,7 +168,7 @@ for epoch in range(epochs):
     if epoch % 50 == 0:
         print(f"epoch:{epoch} | lossTrain: {lossTrain} | lossTest: {lossTest}")
 
-
+"""
 dummy_input = torch.randn(1, 11, dtype=torch.float32).to(device)
 torch.onnx.export(
     model,
@@ -180,24 +182,37 @@ torch.onnx.export(
         "output": {0: "batch"}
     }
 )
+"""
 
 
-#How to vizualise:
+#How to vizualise: https://stackoverflow.com/questions/52468956/how-do-i-visualize-a-net-in-pytorch
 
-dummy_input = torch.randn(1, 11).to(device)
-output = model(dummy_input)
-dot = make_dot(output, params=dict(model.named_parameters()))
-dot.format = 'png'
-dot.render('model_architecture')
+#dummy_input = torch.randn(1, 11).to(device)
+#output = model(dummy_input)
+#dot = make_dot(output, params=dict(model.named_parameters()))
+#dot.format = 'png'
+#dot.render('model_architecture')
 
-model_graph = draw_graph(model, input_size=(1, 11), expand_nested=True, device=device)
-model_graph.visual_graph
+modelArchitecture = draw_graph(model, input_size=(1, 11), expand_nested=True, device=device)
+modelArchitecture.visual_graph
+#modelArchitecture.visual_graph.render('resnet18_architecture', format='png')
+modelArchitecture.visual_graph.render('resnet18SVGarchitecture', format='svg')
 
 """
+For ReLU and TanH() in the middle
 epoch:4800 | lossTrain: 0.010161289945244789 | lossTest: 0.009733160026371479
 epoch:4850 | lossTrain: 0.01170132216066122 | lossTest: 0.01345023699104786
 epoch:4900 | lossTrain: 0.009981871582567692 | lossTest: 0.011563187465071678
 epoch:4950 | lossTrain: 0.00842907465994358 | lossTest: 0.009272655472159386
+"""
+
+"""
+For only ReLU()
+epoch:4800 | lossTrain: 0.007721226662397385 | lossTest: 0.009417756460607052
+epoch:4850 | lossTrain: 0.009070700965821743 | lossTest: 0.01015558186918497
+epoch:4900 | lossTrain: 0.007974457927048206 | lossTest: 0.00914800725877285
+epoch:4950 | lossTrain: 0.008149172179400921 | lossTest: 0.009256409481167793
+
 """
 
 
