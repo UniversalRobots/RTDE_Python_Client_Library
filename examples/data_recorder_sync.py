@@ -45,9 +45,6 @@ if args.verbose:
     logging.basicConfig(level=logging.INFO)
 
 
-# ------------------------------
-# Communication Setup
-# ------------------------------
 conf = rtde_config.ConfigFile(args.config)
 outputNames, outputTypes = conf.get_recipe("out")
 
@@ -64,10 +61,7 @@ if not con.send_start():
     sys.exit()
 
 
-# ------------------------------
-# ASYNC RTDE DATA COLLECTION TASK
-# ------------------------------
-async def collect_rtde_data():
+async def collectRTDEData():
     with open(args.output_rtde, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         header = ["timestamp"] + outputNames
@@ -88,17 +82,13 @@ async def collect_rtde_data():
                 sys.exit()
 
 
-# ------------------------------
-# ASYNC ARDUINO SERIAL READING TASK
-# ------------------------------
 
 
-async def read_arduino():
+async def readArduino():
     with open(args.output_arduino, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["timestamp", "sensor1_x", "sensor1_y", "sensor1_z", "sensor2_x", "sensor2_y", "sensor2_z", "sensor3_x", "sensor3_y", "sensor3_z", "ux", "uy"])
 
-        # Use create_serial_connection with protocol
         transport, protocol = await serial_asyncio.create_serial_connection(
             asyncio.get_event_loop(),
             lambda: SerialReaderProtocol(writer),
@@ -107,23 +97,17 @@ async def read_arduino():
         )
 
         try:
-            await asyncio.Future()  # Run indefinitely
+            await asyncio.Future()
         except asyncio.CancelledError:
             transport.close()
 
 
-# ------------------------------
-# MAIN ASYNC FUNCTION
-# ------------------------------
 async def main():
-    task1 = asyncio.create_task(collect_rtde_data())
-    task2 = asyncio.create_task(read_arduino())
+    task1 = asyncio.create_task(collectRTDEData())
+    task2 = asyncio.create_task(readArduino())
     await asyncio.gather(task1, task2)
 
 
-# ------------------------------
-# RUN THE PROGRAM
-# ------------------------------
 if __name__ == "__main__":
     try:
         asyncio.run(main())

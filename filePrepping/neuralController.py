@@ -1,6 +1,8 @@
 
 
-
+#ANFIS
+#Neural fuzzy controller:
+# https://github.com/gregorLen/S-ANFIS-PyTorch
 import torch.nn as nn
 
 class NNController(nn.Module):

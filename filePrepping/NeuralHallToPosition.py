@@ -34,9 +34,9 @@ print(f"with length: {len(Y[0])}")
 X = (X - X.mean(axis=0)) / X.std(axis=0)
 Y = (Y - Y.mean(axis=0)) / Y.std(axis=0)
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
-train_dataset = TensorDataset(torch.FloatTensor(X_train), torch.FloatTensor(Y_train))
-test_dataset = TensorDataset(torch.FloatTensor(X_test), torch.FloatTensor(Y_test))
+XTrain, XTest, YTrain, YTest = train_test_split(X, Y, test_size=0.2, random_state=42)
+train_dataset = TensorDataset(torch.FloatTensor(XTrain), torch.FloatTensor(YTrain))
+test_dataset = TensorDataset(torch.FloatTensor(XTest), torch.FloatTensor(YTest))
 
 batch_size = 64
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)

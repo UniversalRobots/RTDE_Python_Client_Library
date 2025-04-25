@@ -2,6 +2,10 @@ from torch import nn
 import torch
 import numpy as np
 from sklearn.model_selection import train_test_split
+from torchview import draw_graph
+from torchviz import make_dot
+
+
 def load_data(filepath):
     data = np.loadtxt(filepath, delimiter=",", skiprows=1)
     X = data[:, 1:12]
@@ -10,27 +14,16 @@ def load_data(filepath):
 
 
 def predict(model, input_data):
-    """
-    Make predictions using the trained PyTorch model.
 
-    Args:
-        model: Trained PyTorch model
-        input_data: Input data (numpy array or torch tensor)
-
-    Returns:
-        Predictions as numpy array
-    """
-    # Ensure model is in evaluation mode
+    # make sure the model is in evaluation mode
     model.eval()
 
-    # Convert input to tensor if needed
+    # Convert input to tensor
     if not isinstance(input_data, torch.Tensor):
         input_data = torch.from_numpy(input_data).float()
 
-    # Move to same device as model
     input_data = input_data.to(device)
 
-    # Make prediction with gradient tracking disabled
     with torch.no_grad():
         predictions = model(input_data)
 
@@ -44,7 +37,7 @@ def predict(model, input_data):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
-X, Y = load_data("alignedDatasets/alignedWithOP1404Dataset3.csv")
+X, Y = load_data("alignedDatasets/aligned__25_04_2025_Dataset3.csv")
 
 
 act = nn.ReLU()
@@ -57,31 +50,45 @@ print(Y)
 
 #Definition of the network structure
 class Model_comp(nn.Module):
-    def __init__(self, additionalfactor=1):
+    def __init__(self, additionalfactor=1): #, hiddenSize =
         super().__init__()
         self.addiFactor = additionalfactor
 
-        # Layer 1
+        #optional activation functions
+        #could be benificial to use many different to capture the complexity of the system.
+        # nn.Sigmoid()
+        # nn.ReLU()
+        # nn.SiLU()
+        # nn.Tanh() # positivity: zero centered
+         # torch.nn.Softmax(dim=-1)
+
         self.ll1 = nn.Linear(in_features=11, out_features=int(8 * additionalfactor))
         self.bn1 = nn.BatchNorm1d(int(8 * additionalfactor))  # BatchNorm added
         self.ac1 = nn.ReLU()
 
-        # Layer 2
+        # LSTM layer for recurrence
+        #LSTM can capture long term dependencies
+        #https://www.geeksforgeeks.org/deep-learning-introduction-to-long-short-term-memory/
+        #self.lstm = nn.LSTM(
+        #    input_size=int(8 * additionalfactor),
+        #    hidden_size=hiddenSize,
+        #    batch_first=True
+        #)
+
         self.ll2 = nn.Linear(in_features=int(8 * additionalfactor), out_features=int(32 * additionalfactor))
         self.bn2 = nn.BatchNorm1d(int(32 * additionalfactor))  # BatchNorm added
-        self.ac2 = nn.ReLU()
+        self.ac2 = nn.Tanh()
 
-        # Layer 3
         self.ll3 = nn.Linear(in_features=int(32 * additionalfactor), out_features=(16 * additionalfactor))
         self.bn3 = nn.BatchNorm1d(int(16 * additionalfactor))  # BatchNorm added
-        self.ac3 = nn.ReLU()
+        self.ac3 = nn.Tanh()
 
-        # Layer 4
         self.ll4 = nn.Linear(in_features=(16 * additionalfactor), out_features=(4 * additionalfactor))
         self.bn4 = nn.BatchNorm1d(int(4 * additionalfactor))  # BatchNorm added
+        #self.ac4 = nn.ReLU()
         self.ac4 = nn.ReLU()
 
-        # Output Layer (no BatchNorm here)
+        # Output
         self.output = nn.Linear(in_features=(4 * additionalfactor), out_features=5)
 
     def forward(self, X):
@@ -109,7 +116,7 @@ class Model_comp(nn.Module):
 #test_size = len(full_dataset) - train_size
 #train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
 
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.1, random_state=42, shuffle=True)
+XTrain, XTest, yTrain, yTest = train_test_split(X, Y, test_size=0.1, random_state=42, shuffle=True)
 
 #shuffle
 #bool, default=True
@@ -119,10 +126,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.1, random_
 #array-like, default=None
 #If not None, data is split in a stratified fashion, using this as the class labels. Read more in the User Guide.
 
-X_train = torch.from_numpy(X_train).float().to(device)
-X_test = torch.from_numpy(X_test).float().to(device)
-y_train = torch.from_numpy(y_train).float().to(device)
-y_test = torch.from_numpy(y_test).float().to(device)
+XTrain = torch.from_numpy(XTrain).float().to(device)
+XTest = torch.from_numpy(XTest).float().to(device)
+yTrain = torch.from_numpy(yTrain).float().to(device)
+yTest = torch.from_numpy(yTest).float().to(device)
 
 model = Model_comp(additionalfactor=16).to(device)
 loss_fn = nn.L1Loss()
@@ -137,35 +144,34 @@ for epoch in range(epochs):
     model.train()
 
 
-    y_pred = model(X_train)
+    yPredicted = model(XTrain)
 
     # 2. Calculate loss
-    loss_train = loss_fn(y_pred, y_train)
+    lossTrain = loss_fn(yPredicted, yTrain)
 
     # 3. Optimizer zero grad
     optimizer.zero_grad()
 
-    # 4. Backward pass
-    loss_train.backward()
 
-    # 5 Optimizer step
+    lossTrain.backward()
+
     optimizer.step()
 
     model.eval()
     with torch.inference_mode():
-        y_pred_test = model(X_test)
+        yPredTest = model(XTest)
 
-        loss_test = loss_fn(y_pred_test, y_test)
+        lossTest = loss_fn(yPredTest, yTest)
 
     if epoch % 50 == 0:
-        print(f"epoch:{epoch} | loss_train: {loss_train} | loss_test: {loss_test}")
+        print(f"epoch:{epoch} | lossTrain: {lossTrain} | lossTest: {lossTest}")
 
 
 dummy_input = torch.randn(1, 11, dtype=torch.float32).to(device)
 torch.onnx.export(
     model,
     dummy_input,
-    "mappedModels/neuralWithAllOutput1404set3.onnx",
+    "mappedModels/neural25__04__2025set3.onnx",
     opset_version=20,
     input_names=["input"],
     output_names=["output"],
@@ -174,6 +180,27 @@ torch.onnx.export(
         "output": {0: "batch"}
     }
 )
+
+
+#How to vizualise:
+
+dummy_input = torch.randn(1, 11).to(device)
+output = model(dummy_input)
+dot = make_dot(output, params=dict(model.named_parameters()))
+dot.format = 'png'
+dot.render('model_architecture')
+
+model_graph = draw_graph(model, input_size=(1, 11), expand_nested=True, device=device)
+model_graph.visual_graph
+
+"""
+epoch:4800 | lossTrain: 0.010161289945244789 | lossTest: 0.009733160026371479
+epoch:4850 | lossTrain: 0.01170132216066122 | lossTest: 0.01345023699104786
+epoch:4900 | lossTrain: 0.009981871582567692 | lossTest: 0.011563187465071678
+epoch:4950 | lossTrain: 0.00842907465994358 | lossTest: 0.009272655472159386
+"""
+
+
 """
 test_predictions = predict(model, X)
 print("test_predictions:")

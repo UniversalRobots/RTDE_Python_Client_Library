@@ -85,7 +85,6 @@ class URIKSolver:
         return theta5_
 
     def calculateTheta6(self, T06, theta1_, theta5_):
-        """Calculate theta6 solutions"""
         T60 = np.linalg.inv(T06)
         X60 = T60[:3, 0]
         Y60 = T60[:3, 1]
