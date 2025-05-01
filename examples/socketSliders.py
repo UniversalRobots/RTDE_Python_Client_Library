@@ -7,14 +7,15 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QSlider, QLabel,
 from PyQt6.QtCore import Qt
 
 from examples.iksolver import URIKSolver
-
+#
+#https://www.zacobria.com/universal-robots-knowledge-base-tech-support-forum-hints-tips-cb2-cb3/index.php/ur-script-send-commands-from-host-pc-to-robot-via-socket-connection/
+#https://forum.universal-robots.com/t/send-ur-script-commands-via-sockets-in-python/22751
 # DH-parametre
 a = [0, -0.24365, -0.21325, 0, 0, 0]
 d = [0.1519, 0, 0, 0.11235, 0.08535, 0.0819]
 alpha = [np.pi / 2, 0, 0, np.pi / 2, -np.pi / 2, 0]
 weights = [6, 5, 4, 3, 2, 1]
 
-# Initialiser IK-solver
 ikSolver = URIKSolver(a=a, d=d, alpha=alpha, w=weights)
 
 HOST = "10.0.12.245"
