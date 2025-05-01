@@ -18,20 +18,21 @@ def findMean(file,variableStr):
 
 def findStd(file,variableStr):
     std = file[variableStr].std()
-    print(f'Mean Value of {variableStr} is: {std}')
+    print(f'standard diviation of {variableStr} is: {std}')
     return std
 
 
 def findVariance(file,variableStr):
     variance = file[variableStr].var()
-    print(f'Mean Value of {variableStr} is: {variance}')
+    print(f'variance of {variableStr} data is: {variance}')
     return variance
 
 sensorData = ['sensor1_x','sensor1_y', 'sensor1_z', 'sensor2_x', 'sensor2_y', 'sensor2_z', 'sensor3_x', 'sensor3_y', 'sensor3_z']
 
 for sd in sensorData:
-    findMean(file=df,variableStr=sd)
-    df['sensor1_x'].variance()
+    #findMean(file=df,variableStr=sd)
+    findVariance(file=df,variableStr=sd)
+    findStd(file=df,variableStr=sd)
 
 
 
