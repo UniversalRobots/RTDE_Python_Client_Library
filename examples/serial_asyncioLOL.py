@@ -18,11 +18,9 @@ class SerialReader(asyncio.Protocol):
         line = data.decode().strip()  # Decode and clean the line
         print(f"Teensy Data: {line}")  # Debugging output
 
-        # Expecting "value1,value2,value3" from Teensy
         values = line.split(",")
         if len(values) == 3:
             try:
-                # Convert values to floats
                 v1, v2, v3 = map(float, values)
                 timestamp = time.time()
 

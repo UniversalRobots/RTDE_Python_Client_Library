@@ -40,8 +40,8 @@ class UR3Controller(QWidget):
             slider = QSlider(Qt.Orientation.Horizontal)
             slider.setMinimum(-180 * 4)  # Skalerer verdiene opp
             slider.setMaximum(180 * 4)
-            slider.setValue(self.joint_angles[i] * 4)
-            slider.setTickInterval(1)  # Ett hakk = 0.25 grader
+            slider.setValue(self.joint_angles[i] * 4) # one tick = 0.25 degrees
+            slider.setTickInterval(1)
             slider.valueChanged.connect(self.updateValue)
 
             self.labels.append(label)
@@ -51,7 +51,7 @@ class UR3Controller(QWidget):
             layout.addWidget(slider)
 
         self.save_button = QPushButton("Save setpoint to CSV")
-        self.save_button.clicked.connect(self.saveToCsv)
+        self.save_button.clicked.connect(self.saveToCsv) #Save to CSV if button clicked
         layout.addWidget(self.save_button)
 
         self.setLayout(layout)

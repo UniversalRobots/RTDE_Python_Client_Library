@@ -22,21 +22,9 @@ parser.add_argument("--host", default="10.0.12.245", help="Robot IP")
 parser.add_argument("--port", type=int, default=30004, help="Port number")
 parser.add_argument("--frequency", type=int, default=125, help="Sampling frequency")
 parser.add_argument("--config", default="../xmlDataReader/record_configuration.xml", help="Config file")
-
-
-
-
-
-#   Output files
 parser.add_argument("--output_rtde", default="../csv_data/jointDatWOuP1404dataset3.csv", help="Robot Output CSV")
 parser.add_argument("--output_arduino", default="../csv_data/arduinoDatWOuP1404dataset3.csv", help="Arduino Output CSV")
-
-#------------------------------------------
-# Fill inn arduino com serial port under here
-#------------------------------------------
 parser.add_argument("--serial_port", default="COM12", help="Arduino Serial Port")
-
-
 parser.add_argument("--baud_rate", type=int, default=115200, help="Arduino Baud Rate")
 parser.add_argument("--verbose", action="store_true", help="Verbose output")
 args = parser.parse_args()
@@ -111,7 +99,6 @@ async def main():
 if __name__ == "__main__":
     try:
         asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\n[INFO] Stopping...")
-        con.send_pause()
-        con.disconnect()
+    except:
+        print("Can't run")
+
