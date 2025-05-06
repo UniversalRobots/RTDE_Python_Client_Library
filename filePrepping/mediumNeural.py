@@ -7,13 +7,22 @@ from torchviz import make_dot
 from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('TkAgg') #Tkinter don't work
 import matplotlib.pyplot as plt
 #https://medium.com/@benjybo7/unlocking-success-the-5-essential-metrics-you-must-track-in-neural-network-training-52dcb8874ff0
 
 createOnnxFile = False
-plotComparison = False
+plotComparison = True
 plotError = True
+findIntgratedError = True
+filePath= "../filePrepping/calibratedAlignedDatasets/calibrDataCentered06052025.csv"
+
+instancesForIntError = 200
+
+
+print("Filepath")
+print(filePath)
+
 
 def load_data(filepath):
     data = np.loadtxt(filepath, delimiter=",", skiprows=1)
@@ -37,17 +46,13 @@ def predict(model, input_data):
     return predictions.cpu().numpy()
 
 
-def loop_plot(yPredicted,yReal, stateLabels):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+def loopPlot(yPredicted,yReal, stateLabels, instances=30):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
     fig, axes = plt.subplots(1, 5, figsize=(25, 5))
 
     for i in range(5):
-        #Problably most appropiate to make two graphs but let's see
-        #plot(x, y, color='green', marker='o', linestyle='dashed',
-        #linewidth=2, markersize=12)
-        #axes[i].scatter(yReal[:, i], yPredicted[:, i], alpha=0.5)
         axes[i].plot(yReal[:, i], 'bo--', label=f'Real {stateLabels[i]}')
         axes[i].plot(yPredicted[:, i], 'r--', label=f'Predicted {stateLabels[i]}')
-        axes[i].set_xlim(11201-30, 11201)
+        axes[i].set_xlim(yReal.shape[0]-instances, yReal.shape[0])
         axes[i].set_xlabel('Iteration')
         if i < 3:
             axes[i].set_ylabel('Meters')
@@ -57,7 +62,18 @@ def loop_plot(yPredicted,yReal, stateLabels):  # The plotting: "https://stackove
         axes[i].legend()
     return fig, axes
 
-def loop_plot_error(yPredicted,yReal, stateLabels):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+
+def findIntegratedError(yPredicted,yReal, stateLabels, range1=200):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+    for i in range(5):
+        listOfErrors=[]
+        for p in range(range1):
+            listOfErrors.append(yReal[yReal.shape[0]-1-p, i]-yPredicted[yReal.shape[0]-1-p, i])#, 'bo--', label=f'Error of {stateLabels[i]}')
+        print(f'Integrated Error: for {range1} instances of {stateLabels[i]} is {sum(listOfErrors)}')
+
+
+
+
+def loopPlotError(yPredicted,yReal, stateLabels, instances=30):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
     fig, axes = plt.subplots(1, 5, figsize=(25, 5))
 
     for i in range(5):
@@ -67,7 +83,7 @@ def loop_plot_error(yPredicted,yReal, stateLabels):  # The plotting: "https://st
         #axes[i].scatter(yReal[:, i], yPredicted[:, i], alpha=0.5)
         axes[i].plot(yReal[:, i]-yPredicted[:, i], 'bo--', label=f'Error of {stateLabels[i]}')
         #axes[i].plot(, 'r--', label=f'Predicted {stateLabels[i]}')
-        axes[i].set_xlim(11201-30, 11201)
+        axes[i].set_xlim(yReal.shape[0]-instances, yReal.shape[0])
         axes[i].set_xlabel('Iteration')
         if i < 3:
             axes[i].set_ylabel('Meters')
@@ -84,7 +100,7 @@ def loop_plot_error(yPredicted,yReal, stateLabels):  # The plotting: "https://st
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
-X, Y = load_data("alignedDatasets/aligned__25_04_2025_Dataset3.csv")
+X, Y = load_data(filePath)
 
 
 act = nn.ReLU()
@@ -190,16 +206,12 @@ optimizer = torch.optim.Adam(params = model.parameters(), lr =0.001)
 epochs = 5000
 for epoch in range(epochs):
 
-    # Put the model in training mode at the beginning of an epoch
     model.train()
-
 
     yPredicted = model(XTrain)
 
-    # 2. Calculate loss
     lossTrain = loss_fn(yPredicted, yTrain)
 
-    # 3. Optimizer zero grad
     optimizer.zero_grad()
 
 
@@ -290,31 +302,17 @@ newYList = np.zeros((5, 11201))
 #plots = zip(yPredicted, yReal)
 stateLables = ["X", "Y", "Z", "Roll", "Pitch"]
 
-"""
-def loop_plot(yPredicted,yReal, stateLabels):
-    fig, axes = plt.subplots(1, 5, figsize=(25, 5))
 
-    for i in range(5):
-        #Problably most appropiate to make two graphs but let's see
-        #plot(x, y, color='green', marker='o', linestyle='dashed',
-        #linewidth=2, markersize=12)
-        axes[i].scatter(yReal[:, i], yPredicted[:, i], alpha=0.5)
-        axes[i].plot([yReal[:, i].min(), yReal[:, i].max()],
-                     [yReal[:, i].min(), yReal[:, i].max()], 'r--')
-        axes[i].set_xlabel('True')
-        axes[i].set_ylabel('Predicted')
-        axes[i].set_title(stateLabels[i])
-        #axes[i].
-    return fig, axes
-"""
 if plotComparison:
-    figs, axs = loop_plot(yPredicted, yReal, stateLables)
+    figs, axs = loopPlot(yPredicted, yReal, stateLables)
     plt.tight_layout()
     plt.show()
 
+if findIntgratedError:
+    findIntegratedError(yPredicted, yReal, stateLables, range1=instancesForIntError)
 
 if plotError:
-    figs, axs = loop_plot_error(yPredicted, yReal, stateLables)
+    figs, axs = loopPlotError(yPredicted, yReal, stateLables)
     plt.tight_layout()
     plt.show()
 

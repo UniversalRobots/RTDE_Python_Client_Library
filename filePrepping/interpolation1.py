@@ -13,7 +13,7 @@ from scipy.interpolate import interp1d
 
 # Load and sort data
 robotDf = pd.read_csv("../csv_data/xyzEulDS25_04_2025.csv").sort_values("timestamp")
-arduinoDf = pd.read_csv("../csv_data/arduinoDatWOuP1404dataset3.csv").sort_values("timestamp")
+arduinoDf = pd.read_csv("../filePrepping/alignedDatasets/arduino_matched_to_robot.csv").sort_values("timestamp")
 #csv_data/arduinoDatWOuP1404dataset2.csv
 #robotDf = pd.read_csv("../csv_data/jointDatWOuP1404dataset2.csv").sort_values("timestamp")
 #arduinoDf = pd.read_csv("../csv_data/arduinoDatWOuP1404dataset2.csv").sort_values("timestamp")
@@ -51,7 +51,7 @@ alignedData = pd.DataFrame({
     **interpolatedRobotData
 })
 
-alignedData.to_csv("alignedDatasets/aligned__25_04_2025_Dataset3.csv", index=False)
+alignedData.to_csv("calibratedAlignedDatasets/calibratedData06052025.csv", index=False)
 print(f"Aligned {len(alignedData)} samples")
 print(f"Arduino/robot ratio: {len(alignedData)/len(robotDf):.1f}x")
 
