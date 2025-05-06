@@ -66,9 +66,10 @@ def loopPlot(yPredicted,yReal, stateLabels, instances=30):  # The plotting: "htt
 def findIntegratedError(yPredicted,yReal, stateLabels, range1=200):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
     for i in range(5):
         listOfErrors=[]
-        for p in range(range1):
-            listOfErrors.append(yReal[yReal.shape[0]-1-p, i]-yPredicted[yReal.shape[0]-1-p, i])#, 'bo--', label=f'Error of {stateLabels[i]}')
-        print(f'Integrated Error: for {range1} instances of {stateLabels[i]} is {sum(listOfErrors)}')
+        for p in range(len(yPredicted)):
+            listOfErrors.append((yReal[p, i]-yPredicted[p, i])**2)#, 'bo--', label=f'Error of {stateLabels[i]}')
+        print(f'MeanSquarederror for test dataset of {len(yPredicted)} instances of {stateLabels[i]} is {sum(listOfErrors)/len(listOfErrors)}')
+        listOfErrors.clear()
 
 
 
@@ -177,20 +178,10 @@ class Model_comp(nn.Module):
         X = self.output(X)
         return X
 
-#https://stackoverflow.com/questions/50544730/how-do-i-split-a-custom-dataset-into-training-and-test-datasets
-#train_size = int(0.8 * len(full_dataset))
-#test_size = len(full_dataset) - train_size
-#train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
+
 
 XTrain, XTest, yTrain, yTest = train_test_split(X, Y, test_size=0.1, random_state=42, shuffle=True)
 
-#shuffle
-#bool, default=True
-#Whether or not to shuffle the data before splitting. If shuffle=False then stratify must be None.
-
-#stratify
-#array-like, default=None
-#If not None, data is split in a stratified fashion, using this as the class labels. Read more in the User Guide.
 
 XTrain = torch.from_numpy(XTrain).float().to(device)
 XTest = torch.from_numpy(XTest).float().to(device)
@@ -263,8 +254,9 @@ if (createOnnxFile):
 #modelArchitecture.visual_graph.render('resnet18SVGarchitecture', format='svg')
 
 yReal = yTest.cpu().numpy()
-yPredicted = yPredTest.cpu().numpy()
+#yPredicted = yPredTest.cpu().numpy()
 
+yPredicted = predict(model, XTest.cpu().numpy())
 
 
 print("MAE:", lossTest.item())
@@ -344,7 +336,7 @@ test_predictions = predict(model, X)
 print("test_predictions:")
 print(test_predictions)
 
-
+"""
 test_predictions2 = predict(model, torch.from_numpy(np.array([[-1.19, -0.22, -14.42, 5.2, -5.51, -6.34, 3.37, 150.73, -11.19, 0, 0],
                                     [-1.16, -0.24, -14.45, 5.19, -5.45, -6.34, 3.36, 150.79, -11.2, 0, 0],
                                     [-1.19, -0.19, -14.42, 5.21, -5.49, -6.28, 3.38, 150.76, -11.13, 0, 0],
@@ -353,6 +345,8 @@ test_predictions2 = predict(model, torch.from_numpy(np.array([[-1.19, -0.22, -14
                                     [-1.18, -0.19, -14.47, 5.21, -5.47, -6.29, 3.38, 150.78, -11.15, 0, 0]
                                     ])).float().to(device)
                             )
+
+"""""
 print("test_predictions2:")
 print(test_predictions2)
 
