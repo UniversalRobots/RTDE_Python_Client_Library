@@ -4,7 +4,16 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from torchview import draw_graph
 from torchviz import make_dot
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+#https://medium.com/@benjybo7/unlocking-success-the-5-essential-metrics-you-must-track-in-neural-network-training-52dcb8874ff0
 
+createOnnxFile = False
+plotComparison = False
+plotError = True
 
 def load_data(filepath):
     data = np.loadtxt(filepath, delimiter=",", skiprows=1)
@@ -14,7 +23,6 @@ def load_data(filepath):
 
 
 def predict(model, input_data):
-
 
     model.eval()
 
@@ -28,6 +36,46 @@ def predict(model, input_data):
 
     return predictions.cpu().numpy()
 
+
+def loop_plot(yPredicted,yReal, stateLabels):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+    fig, axes = plt.subplots(1, 5, figsize=(25, 5))
+
+    for i in range(5):
+        #Problably most appropiate to make two graphs but let's see
+        #plot(x, y, color='green', marker='o', linestyle='dashed',
+        #linewidth=2, markersize=12)
+        #axes[i].scatter(yReal[:, i], yPredicted[:, i], alpha=0.5)
+        axes[i].plot(yReal[:, i], 'bo--', label=f'Real {stateLabels[i]}')
+        axes[i].plot(yPredicted[:, i], 'r--', label=f'Predicted {stateLabels[i]}')
+        axes[i].set_xlim(11201-30, 11201)
+        axes[i].set_xlabel('Iteration')
+        if i < 3:
+            axes[i].set_ylabel('Meters')
+        else:
+            axes[i].set_ylabel('Radians')
+        axes[i].set_title(stateLabels[i])
+        axes[i].legend()
+    return fig, axes
+
+def loop_plot_error(yPredicted,yReal, stateLabels):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+    fig, axes = plt.subplots(1, 5, figsize=(25, 5))
+
+    for i in range(5):
+        #Problably most appropiate to make two graphs but let's see
+        #plot(x, y, color='green', marker='o', linestyle='dashed',
+        #linewidth=2, markersize=12)
+        #axes[i].scatter(yReal[:, i], yPredicted[:, i], alpha=0.5)
+        axes[i].plot(yReal[:, i]-yPredicted[:, i], 'bo--', label=f'Error of {stateLabels[i]}')
+        #axes[i].plot(, 'r--', label=f'Predicted {stateLabels[i]}')
+        axes[i].set_xlim(11201-30, 11201)
+        axes[i].set_xlabel('Iteration')
+        if i < 3:
+            axes[i].set_ylabel('Meters')
+        else:
+            axes[i].set_ylabel('Radians')
+        axes[i].set_title(f"NN prediction error of {stateLabels[i]}")
+        axes[i].legend()
+    return fig, axes
 
 #sources
 # https://medium.com/@piyushkashyap045/building-a-simple-neural-network-with-pytorch-42337d90a065
@@ -168,21 +216,25 @@ for epoch in range(epochs):
     if epoch % 50 == 0:
         print(f"epoch:{epoch} | lossTrain: {lossTrain} | lossTest: {lossTest}")
 
-"""
-dummy_input = torch.randn(1, 11, dtype=torch.float32).to(device)
-torch.onnx.export(
-    model,
-    dummy_input,
-    "mappedModels/neural25__04__2025set3.onnx",
-    opset_version=20,
-    input_names=["input"],
-    output_names=["output"],
-    dynamic_axes={
-        "input": {0: "batch"},
-        "output": {0: "batch"}
-    }
-)
-"""
+
+
+
+
+if (createOnnxFile):
+    dummyInput = torch.randn(1, 11, dtype=torch.float32).to(device)
+    torch.onnx.export(
+        model,
+        dummyInput,
+        "mappedModels/neural25__04__2025set3.onnx",
+        opset_version=20,
+        input_names=["input"],
+        output_names=["output"],
+        dynamic_axes={
+            "input": {0: "batch"},
+            "output": {0: "batch"}
+        }
+    )
+
 
 
 #How to vizualise: https://stackoverflow.com/questions/52468956/how-do-i-visualize-a-net-in-pytorch
@@ -193,10 +245,83 @@ torch.onnx.export(
 #dot.format = 'png'
 #dot.render('model_architecture')
 
-modelArchitecture = draw_graph(model, input_size=(1, 11), expand_nested=True, device=device)
-modelArchitecture.visual_graph
+#modelArchitecture = draw_graph(model, input_size=(1, 11), expand_nested=True, device=device)
+#modelArchitecture.visual_graph
 #modelArchitecture.visual_graph.render('resnet18_architecture', format='png')
-modelArchitecture.visual_graph.render('resnet18SVGarchitecture', format='svg')
+#modelArchitecture.visual_graph.render('resnet18SVGarchitecture', format='svg')
+
+yReal = yTest.cpu().numpy()
+yPredicted = yPredTest.cpu().numpy()
+
+
+
+print("MAE:", lossTest.item())
+print("MSE:", mean_squared_error(yReal, yPredicted))
+print("R2 Score:", r2_score(yReal, yPredicted))
+
+
+print('yPredicted')
+print(yPredicted)
+
+print('yReal')
+print(yReal)
+
+print('yPredicted.shape()')
+print(yPredicted.shape)
+
+print('yReal')
+print(yReal.shape)
+
+
+#import matplotlib.pyplot as plt
+#import numpy as np
+
+
+
+#fig, axes = plt.subplots(1, n_outputs, figsize=(5 * n_outputs, 5))
+#Plots in for loops
+#plots = zip(x, y)
+
+newXList = np.zeros((5, 11201))
+newYList = np.zeros((5, 11201))
+
+
+
+#plots = zip(yPredicted, yReal)
+stateLables = ["X", "Y", "Z", "Roll", "Pitch"]
+
+"""
+def loop_plot(yPredicted,yReal, stateLabels):
+    fig, axes = plt.subplots(1, 5, figsize=(25, 5))
+
+    for i in range(5):
+        #Problably most appropiate to make two graphs but let's see
+        #plot(x, y, color='green', marker='o', linestyle='dashed',
+        #linewidth=2, markersize=12)
+        axes[i].scatter(yReal[:, i], yPredicted[:, i], alpha=0.5)
+        axes[i].plot([yReal[:, i].min(), yReal[:, i].max()],
+                     [yReal[:, i].min(), yReal[:, i].max()], 'r--')
+        axes[i].set_xlabel('True')
+        axes[i].set_ylabel('Predicted')
+        axes[i].set_title(stateLabels[i])
+        #axes[i].
+    return fig, axes
+"""
+if plotComparison:
+    figs, axs = loop_plot(yPredicted, yReal, stateLables)
+    plt.tight_layout()
+    plt.show()
+
+
+if plotError:
+    figs, axs = loop_plot_error(yPredicted, yReal, stateLables)
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+
 
 """
 For ReLU and TanH() in the middle
