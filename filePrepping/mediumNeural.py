@@ -9,12 +9,20 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg') #Tkinter don't work
 import matplotlib.pyplot as plt
+from scipy.stats import binned_statistic_2d
 #https://medium.com/@benjybo7/unlocking-success-the-5-essential-metrics-you-must-track-in-neural-network-training-52dcb8874ff0
+## Activation of different tests
 
 createOnnxFile = False
-plotComparison = True
-plotError = True
-findIntgratedError = True
+plotComparison = False
+plotError = False
+findIntgratedError = False
+negPosMSEX = True
+negPosDistanceMarg = 0.012
+testDatasetSize = 0.1
+
+
+##
 filePath= "../filePrepping/calibratedAlignedDatasets/calibrDataCentered06052025.csv"
 
 instancesForIntError = 200
@@ -46,7 +54,7 @@ def predict(model, input_data):
     return predictions.cpu().numpy()
 
 
-def loopPlot(yPredicted,yReal, stateLabels, instances=30):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+def loopPlot(yPredicted,yReal, stateLabels, instances=100):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
     fig, axes = plt.subplots(1, 5, figsize=(25, 5))
 
     for i in range(5):
@@ -63,7 +71,7 @@ def loopPlot(yPredicted,yReal, stateLabels, instances=30):  # The plotting: "htt
     return fig, axes
 
 
-def findIntegratedError(yPredicted,yReal, stateLabels, range1=200):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+def findIntegratedError(yPredicted,yReal, stateLabels):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
     for i in range(5):
         listOfErrors=[]
         for p in range(len(yPredicted)):
@@ -74,25 +82,63 @@ def findIntegratedError(yPredicted,yReal, stateLabels, range1=200):  # The plott
 
 
 
-def loopPlotError(yPredicted,yReal, stateLabels, instances=30):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+def loopPlotError(yPredicted, yReal, stateLabels, instances=100):
     fig, axes = plt.subplots(1, 5, figsize=(25, 5))
-
     for i in range(5):
-        #Problably most appropiate to make two graphs but let's see
-        #plot(x, y, color='green', marker='o', linestyle='dashed',
-        #linewidth=2, markersize=12)
-        #axes[i].scatter(yReal[:, i], yPredicted[:, i], alpha=0.5)
         axes[i].plot(yReal[:, i]-yPredicted[:, i], 'bo--', label=f'Error of {stateLabels[i]}')
-        #axes[i].plot(, 'r--', label=f'Predicted {stateLabels[i]}')
         axes[i].set_xlim(yReal.shape[0]-instances, yReal.shape[0])
         axes[i].set_xlabel('Iteration')
         if i < 3:
             axes[i].set_ylabel('Meters')
         else:
+            axes[i].set_ylim(-1, 1)
             axes[i].set_ylabel('Radians')
         axes[i].set_title(f"NN prediction error of {stateLabels[i]}")
         axes[i].legend()
     return fig, axes
+
+
+def negNPosMSE(yPredicted, yReal, stateLabels, margin= 0.0):  # inspiration for the slicing: https://stackoverflow.com/questions/59832655/python-how-to-make-a-list-out-of-all-the-indexes-with-a-certain-value-from-anoth
+    XPosInstances = []
+    XNegInstances = []
+    for inx in range(yReal.shape[0]):
+        if yReal[inx, 0] > margin:
+            XPosInstances.append(inx)
+        elif yReal[inx, 0] < -margin:
+            XNegInstances.append(inx)
+    print(f"Total positive instances of X {margin} meters: {len(XPosInstances)}")
+    print(f"Total negative instances of X {margin} meters: {len(XNegInstances)}")
+    for i in range(len(stateLabels)):  
+        msePositv = sum([(yReal[n, i] - yPredicted[n, i]) ** 2 for n in XPosInstances]) / len(XPosInstances) if XPosInstances else float('nan')
+        mseNegitv = sum([(yReal[n, i] - yPredicted[n, i]) ** 2 for n in XNegInstances]) / len(XNegInstances) if XNegInstances else float('nan')
+        print(f"Mean squared error of {stateLabels[i]} for only instances when X is positive: {msePositv:.6f}, with margin of {margin} meters")
+        print(f"Mean squared error of {stateLabels[i]} for only instances when X is negative: {mseNegitv:.6f}, with margin of {margin} meters")
+
+
+def heatmapPredMSE(yReal, yPredicted): #heatMaps: https://stackoverflow.com/questions/33282368/plotting-a-2d-heatmap
+    x = yReal[:, 0] #X POS
+    y = yReal[:, 1] #Y POS
+    error_x = (yReal[:, 0] - yPredicted[:, 0]) ** 2
+
+    n_bins = 100
+
+    stat, xEdges, yEdges, binnumber = binned_statistic_2d(
+        x, y, error_x, statistic='mean', bins=n_bins
+    )
+
+    plt.figure(figsize=(8, 6))
+    plt.imshow(
+        np.flipud(stat.T),
+        extent=[xEdges[0], xEdges[-1], yEdges[0], yEdges[-1]],
+        aspect='auto',
+        cmap='hot'
+    )
+    plt.colorbar(label='Mean Squared Error in X')
+    plt.xlabel('Real X')
+    plt.ylabel('Real Y')
+    plt.title('Heatmap of MSE in X over (X, Y) space')
+    plt.show()
+
 
 #sources
 # https://medium.com/@piyushkashyap045/building-a-simple-neural-network-with-pytorch-42337d90a065
@@ -180,7 +226,7 @@ class Model_comp(nn.Module):
 
 
 
-XTrain, XTest, yTrain, yTest = train_test_split(X, Y, test_size=0.1, random_state=42, shuffle=True)
+XTrain, XTest, yTrain, yTest = train_test_split(X, Y, test_size=testDatasetSize, random_state=42, shuffle=True)
 
 
 XTrain = torch.from_numpy(XTrain).float().to(device)
@@ -301,14 +347,18 @@ if plotComparison:
     plt.show()
 
 if findIntgratedError:
-    findIntegratedError(yPredicted, yReal, stateLables, range1=instancesForIntError)
+    findIntegratedError(yPredicted, yReal, stateLables)
 
 if plotError:
     figs, axs = loopPlotError(yPredicted, yReal, stateLables)
     plt.tight_layout()
     plt.show()
 
+if negPosMSEX:
+    negNPosMSE(yPredicted, yReal, stateLables, margin=negPosDistanceMarg)
 
+
+heatmapPredMSE(yReal, yPredicted)
 
 
 
@@ -355,4 +405,71 @@ new_data = np.random.rand(5, 11)
 new_predictions = predict(model, new_data)
 print("new_predictions:")
 print(new_predictions)
+"""
+
+#MSE for certain positions outputs:
+"""
+Total positive instances of X 0.007 meters: 688
+Total negative instances of X 0.007 meters: 792
+Mean squared error of X for only instances when X is positive: 0.000007, with margin of 0.007 meters
+Mean squared error of X for only instances when X is negative: 0.000011, with margin of 0.007 meters
+Mean squared error of Y for only instances when X is positive: 0.000026, with margin of 0.007 meters
+Mean squared error of Y for only instances when X is negative: 0.000004, with margin of 0.007 meters
+Mean squared error of Z for only instances when X is positive: 0.000026, with margin of 0.007 meters
+Mean squared error of Z for only instances when X is negative: 0.000016, with margin of 0.007 meters
+Mean squared error of Roll for only instances when X is positive: 0.111583, with margin of 0.007 meters
+Mean squared error of Roll for only instances when X is negative: 0.002029, with margin of 0.007 meters
+Mean squared error of Pitch for only instances when X is positive: 0.000030, with margin of 0.007 meters
+Mean squared error of Pitch for only instances when X is negative: 0.000100, with margin of 0.007 meters
+
+"""
+
+"""
+Total positive instances of X 0.009 meters: 627
+Total negative instances of X 0.009 meters: 257
+Mean squared error of X for only instances when X is positive: 0.000007, with margin of 0.009 meters
+Mean squared error of X for only instances when X is negative: 0.000008, with margin of 0.009 meters
+Mean squared error of Y for only instances when X is positive: 0.000001, with margin of 0.009 meters
+Mean squared error of Y for only instances when X is negative: 0.000003, with margin of 0.009 meters
+Mean squared error of Z for only instances when X is positive: 0.000051, with margin of 0.009 meters
+Mean squared error of Z for only instances when X is negative: 0.000012, with margin of 0.009 meters
+Mean squared error of Roll for only instances when X is positive: 0.000188, with margin of 0.009 meters
+Mean squared error of Roll for only instances when X is negative: 0.000197, with margin of 0.009 meters
+Mean squared error of Pitch for only instances when X is positive: 0.000062, with margin of 0.009 meters
+Mean squared error of Pitch for only instances when X is negative: 0.000020, with margin of 0.009 meters
+"""
+
+"""
+Total positive instances of X 0.012 meters: 232
+Total negative instances of X 0.012 meters: 171
+Mean squared error of X for only instances when X is positive: 0.000041, with margin of 0.012 meters
+Mean squared error of X for only instances when X is negative: 0.000003, with margin of 0.012 meters
+Mean squared error of Y for only instances when X is positive: 0.000034, with margin of 0.012 meters
+Mean squared error of Y for only instances when X is negative: 0.000005, with margin of 0.012 meters
+Mean squared error of Z for only instances when X is positive: 0.000005, with margin of 0.012 meters
+Mean squared error of Z for only instances when X is negative: 0.000011, with margin of 0.012 meters
+Mean squared error of Roll for only instances when X is positive: 0.000080, with margin of 0.012 meters
+Mean squared error of Roll for only instances when X is negative: 0.000024, with margin of 0.012 meters
+Mean squared error of Pitch for only instances when X is positive: 0.000005, with margin of 0.012 meters
+Mean squared error of Pitch for only instances when X is negative: 0.000010, with margin of 0.012 meters
+
+Process finished with exit code 0
+
+
+"""
+
+
+"""
+Mean squared error of X for only instances when X is positive: 0.000029, with margin of 0.015 meters
+Mean squared error of X for only instances when X is negative: 0.000010, with margin of 0.015 meters
+Mean squared error of Y for only instances when X is positive: 0.000009, with margin of 0.015 meters
+Mean squared error of Y for only instances when X is negative: 0.000003, with margin of 0.015 meters
+Mean squared error of Z for only instances when X is positive: 0.000015, with margin of 0.015 meters
+Mean squared error of Z for only instances when X is negative: 0.000000, with margin of 0.015 meters
+Mean squared error of Roll for only instances when X is positive: 0.000087, with margin of 0.015 meters
+Mean squared error of Roll for only instances when X is negative: 0.000410, with margin of 0.015 meters
+Mean squared error of Pitch for only instances when X is positive: 0.000018, with margin of 0.015 meters
+Mean squared error of Pitch for only instances when X is negative: 0.000001, with margin of 0.015 meters
+
+
 """
