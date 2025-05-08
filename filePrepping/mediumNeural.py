@@ -13,7 +13,7 @@ from scipy.stats import binned_statistic_2d
 #https://medium.com/@benjybo7/unlocking-success-the-5-essential-metrics-you-must-track-in-neural-network-training-52dcb8874ff0
 ## Activation of different tests
 
-createOnnxFile = False
+createOnnxFile = True
 plotComparison = False
 plotError = False
 findIntgratedError = False
@@ -32,7 +32,7 @@ print("Filepath")
 print(filePath)
 
 
-def load_data(filepath):
+def loadData(filepath):
     data = np.loadtxt(filepath, delimiter=",", skiprows=1)
     X = data[:, 1:12]
     Y = data[:, 12:17]
@@ -147,7 +147,7 @@ def heatmapPredMSE(yReal, yPredicted): #heatMaps: https://stackoverflow.com/ques
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
-X, Y = load_data(filePath)
+X, Y = loadData(filePath)
 
 
 act = nn.ReLU()
@@ -274,7 +274,7 @@ if (createOnnxFile):
     torch.onnx.export(
         model,
         dummyInput,
-        "mappedModels/neural25__04__2025set3.onnx",
+        "mappedModels/neural08__05__2025set3.onnx",
         opset_version=20,
         input_names=["input"],
         output_names=["output"],

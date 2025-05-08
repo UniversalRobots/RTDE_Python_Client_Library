@@ -7,10 +7,13 @@ import pandas as pd
 #https://www.geeksforgeeks.org/use-pandas-to-calculate-stats-from-an-imported-csv-file/
 
 #Remembter
-df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeuralWUxUy25__04__2025.csv')
+df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeu300HZ08__08__2025.csv')
 #C:/Users/hanur/Documents/UNIVERSITY/pythonProjects/RTDEPythonClientLibraryMagLev/csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeuralWUxUy25__04__2025.csv
 addDerivatives = True
-itsMictoSecUnit = True
+itsMictoSecUnit = False
+itsNanoSecUnit = True
+saveFile = True
+useMeanDT = True
 #csv file columns: Timestamp,X,Y,Z,Roll,Pitch,ux,uy
 
 #meanX =df['X'].mean()
@@ -61,17 +64,30 @@ if (itsMictoSecUnit):
     for i in range(0, len(dfCalibrated['Timestamp'])):
         dfCalibrated['Timestamp'] = dfCalibrated['Timestamp'] - dfCalibrated.loc[0,'Timestamp']
 
-dfCalibrated['dt'] = dfCalibrated['Timestamp'].diff()
 
-print(dfCalibrated['dt'])
+if (itsNanoSecUnit):
+    dfCalibrated['Timestamp'] = df['Timestamp']/(10**9)
+    for i in range(0, len(dfCalibrated['Timestamp'])):
+        dfCalibrated['Timestamp'] = dfCalibrated['Timestamp'] - dfCalibrated.loc[0,'Timestamp']
+
+
+
+#dfCalibrated['dt'] = dfCalibrated['Timestamp'].diff()
+
 
 #fine tuning:
-dfCalibrated['dt'].values[0] = 0
+#dfCalibrated['dt'].values[0] = 0
 
 
 
 #Using the mean dt
 meanDt = (dfCalibrated['Timestamp'] - dfCalibrated['Timestamp'][0]).diff().mean()
+
+
+print("This is dt:")
+print("dt")
+
+
 dfCalibrated['dt'] = meanDt
 
 print('mean_dt', meanDt)
@@ -114,8 +130,9 @@ for var in deltaCols:
 
 
 print(dfCalibrated)
-
-dfCalibrated.to_csv('../csv_data/standalone_arduino_data/xyzEuler/calibrated/calibrated25__04__2025.csv', index=False)
+if saveFile:
+    dfCalibrated.to_csv('../csv_data/standalone_arduino_data/xyzEuler/calibrated/calibrated300HZ09052025.csv', index=False)
+    print('Saved File')
 
 
 
