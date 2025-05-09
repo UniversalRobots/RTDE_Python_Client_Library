@@ -13,9 +13,9 @@ from scipy.stats import binned_statistic_2d
 #https://medium.com/@benjybo7/unlocking-success-the-5-essential-metrics-you-must-track-in-neural-network-training-52dcb8874ff0
 ## Activation of different tests
 
-createOnnxFile = True
-plotComparison = False
-plotError = False
+createOnnxFile = False
+plotComparison = True
+plotError = True
 findIntgratedError = False
 negPosMSEX = True
 negPosDistanceMarg = 0.012
@@ -54,7 +54,7 @@ def predict(model, input_data):
     return predictions.cpu().numpy()
 
 
-def loopPlot(yPredicted,yReal, stateLabels, instances=100):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+def loopPlot(yPredicted,yReal, stateLabels, instances=150):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
     fig, axes = plt.subplots(1, 5, figsize=(25, 5))
 
     for i in range(5):
@@ -82,7 +82,7 @@ def findIntegratedError(yPredicted,yReal, stateLabels):  # The plotting: "https:
 
 
 
-def loopPlotError(yPredicted, yReal, stateLabels, instances=100):
+def loopPlotError(yPredicted, yReal, stateLabels, instances=150):
     fig, axes = plt.subplots(1, 5, figsize=(25, 5))
     for i in range(5):
         axes[i].plot(yReal[:, i]-yPredicted[:, i], 'bo--', label=f'Error of {stateLabels[i]}')

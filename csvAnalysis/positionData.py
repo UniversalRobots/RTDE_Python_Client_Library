@@ -7,7 +7,7 @@ import pandas as pd
 #https://www.geeksforgeeks.org/use-pandas-to-calculate-stats-from-an-imported-csv-file/
 
 #Remembter
-df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeu300HZ08__08__2025.csv')
+df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulOnTable09082025.csv')
 #C:/Users/hanur/Documents/UNIVERSITY/pythonProjects/RTDEPythonClientLibraryMagLev/csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeuralWUxUy25__04__2025.csv
 addDerivatives = True
 itsMictoSecUnit = False
@@ -81,6 +81,8 @@ if (itsNanoSecUnit):
 
 
 #Using the mean dt
+
+#This must surlet be wrong???
 meanDt = (dfCalibrated['Timestamp'] - dfCalibrated['Timestamp'][0]).diff().mean()
 
 
@@ -91,6 +93,16 @@ print("dt")
 dfCalibrated['dt'] = meanDt
 
 print('mean_dt', meanDt)
+print("data frequency", 1/meanDt)
+
+
+print("At 300:")
+print(dfCalibrated['Timestamp'][300])
+
+print("At 600:")
+print(dfCalibrated['Timestamp'][600])
+
+
 #print(mean_dt)
 #print(dfCalibrated['dt'])
 
@@ -131,7 +143,7 @@ for var in deltaCols:
 
 print(dfCalibrated)
 if saveFile:
-    dfCalibrated.to_csv('../csv_data/standalone_arduino_data/xyzEuler/calibrated/calibrated300HZ09052025.csv', index=False)
+    dfCalibrated.to_csv('../csv_data/standalone_arduino_data/xyzEuler/calibrated/OnTableneuralData300HZZZ09052025.csv', index=False)
     print('Saved File')
 
 
