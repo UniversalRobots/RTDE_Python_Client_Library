@@ -16,15 +16,16 @@ from scipy.stats import binned_statistic_2d
 createOnnxFile = False
 plotComparison = True
 plotError = True
-findIntgratedError = False
+findIntgratedError = True
 negPosMSEX = True
-negPosDistanceMarg = 0.012
+negPosDistanceMarg = 0.014
 testDatasetSize = 0.1
 
 
 ##
-filePath= "../filePrepping/calibratedAlignedDatasets/calibrDataCentered06052025.csv"
-
+#filePath= "../filePrepping/calibratedAlignedDatasets/calibrDataCentered06052025.csv"
+#file with normalized roll: "../filePrepping/calibratedAlignedDatasets/normalized14052025.csv"
+filePath= "../filePrepping/calibratedAlignedDatasets/normalized14052025.csv"
 instancesForIntError = 200
 
 
@@ -54,7 +55,7 @@ def predict(model, input_data):
     return predictions.cpu().numpy()
 
 
-def loopPlot(yPredicted,yReal, stateLabels, instances=150):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
+def loopPlot(yPredicted,yReal, stateLabels, instances=30):  # The plotting: "https://stackoverflow.com/questions/35829961/using-matplotlib-with-tkinter-tkagg"
     fig, axes = plt.subplots(1, 5, figsize=(25, 5))
 
     for i in range(5):
@@ -82,7 +83,7 @@ def findIntegratedError(yPredicted,yReal, stateLabels):  # The plotting: "https:
 
 
 
-def loopPlotError(yPredicted, yReal, stateLabels, instances=150):
+def loopPlotError(yPredicted, yReal, stateLabels, instances=30):
     fig, axes = plt.subplots(1, 5, figsize=(25, 5))
     for i in range(5):
         axes[i].plot(yReal[:, i]-yPredicted[:, i], 'bo--', label=f'Error of {stateLabels[i]}')
@@ -176,14 +177,6 @@ class Model_comp(nn.Module):
         self.bn1 = nn.BatchNorm1d(int(8 * additionalfactor))  # BatchNorm added
         self.ac1 = nn.ReLU()
 
-        # LSTM layer for recurrence
-        #LSTM can capture long term dependencies
-        #https://www.geeksforgeeks.org/deep-learning-introduction-to-long-short-term-memory/
-        #self.lstm = nn.LSTM(
-        #    input_size=int(8 * additionalfactor),
-        #    hidden_size=hiddenSize,
-        #    batch_first=True
-        #)
 
         self.ll2 = nn.Linear(in_features=int(8 * additionalfactor), out_features=int(32 * additionalfactor))
         self.bn2 = nn.BatchNorm1d(int(32 * additionalfactor))  # BatchNorm added
@@ -201,7 +194,6 @@ class Model_comp(nn.Module):
         #self.ac4 = nn.ReLU()
         self.ac4 = nn.ReLU()
 
-        # Output
         self.output = nn.Linear(in_features=(4 * additionalfactor), out_features=5)
 
     def forward(self, X):
