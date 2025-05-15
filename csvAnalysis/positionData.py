@@ -7,7 +7,7 @@ import pandas as pd
 #https://www.geeksforgeeks.org/use-pandas-to-calculate-stats-from-an-imported-csv-file/
 
 #Remembter
-df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulOnTable09082025.csv')
+df = pd.read_csv('../csv_data/standalone_arduino_data/xyzEuler/xyzEulO15052025.csv')
 #C:/Users/hanur/Documents/UNIVERSITY/pythonProjects/RTDEPythonClientLibraryMagLev/csv_data/standalone_arduino_data/xyzEuler/xyzEulerNeuralWUxUy25__04__2025.csv
 addDerivatives = True
 itsMictoSecUnit = False
@@ -143,7 +143,7 @@ for var in deltaCols:
 
 print(dfCalibrated)
 if saveFile:
-    dfCalibrated.to_csv('../csv_data/standalone_arduino_data/xyzEuler/calibrated/OnTableneuralData300HZZZ09052025.csv', index=False)
+    dfCalibrated.to_csv('../csv_data/standalone_arduino_data/xyzEuler/calibrated/OnTableneuralData300HZ15052025.csv', index=False)
     print('Saved File')
 
 

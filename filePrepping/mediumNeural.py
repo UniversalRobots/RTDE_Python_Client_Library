@@ -266,7 +266,7 @@ if (createOnnxFile):
     torch.onnx.export(
         model,
         dummyInput,
-        "mappedModels/neural08__05__2025set3.onnx",
+        "mappedModels/neural_fixWrapping15__05__2025set3.onnx",
         opset_version=20,
         input_names=["input"],
         output_names=["output"],
@@ -354,6 +354,26 @@ heatmapPredMSE(yReal, yPredicted)
 
 
 
+""" After dealing with agle wrapping for roll angle 
+and choosing a slightly different datainterpolation method where every teensy datapoint which couldn't be
+Matched to a particular UR3 datapoint, because an others was closer in timestamp.
+
+
+
+ 
+epoch:4400 | lossTrain: 0.004145381040871143 | lossTest: 0.005061356816440821
+epoch:4450 | lossTrain: 0.0031276808585971594 | lossTest: 0.004390477668493986
+epoch:4500 | lossTrain: 0.004002440720796585 | lossTest: 0.0042970627546310425
+epoch:4550 | lossTrain: 0.0038579311221837997 | lossTest: 0.005102937575429678
+epoch:4600 | lossTrain: 0.0037095057778060436 | lossTest: 0.004428946878761053
+epoch:4650 | lossTrain: 0.0034093393478542566 | lossTest: 0.0038724872283637524
+epoch:4700 | lossTrain: 0.0034902729094028473 | lossTest: 0.0038479899521917105
+epoch:4750 | lossTrain: 0.003993363119661808 | lossTest: 0.004881635308265686
+epoch:4800 | lossTrain: 0.004111777991056442 | lossTest: 0.004641972482204437
+epoch:4850 | lossTrain: 0.0037185524124652147 | lossTest: 0.003655308624729514
+epoch:4900 | lossTrain: 0.0038636671379208565 | lossTest: 0.004562688525766134
+epoch:4950 | lossTrain: 0.0035429829731583595 | lossTest: 0.004603744950145483
+"""
 
 """
 For ReLU and TanH() in the middle
