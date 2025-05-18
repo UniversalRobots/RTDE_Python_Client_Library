@@ -26,7 +26,8 @@ def sendRobotJointData(host, port, csvFilePath, velocity, acceleration, delay):
                             print(f"iteration {i + 1}")
                             angleRow[i] = float(row[i])
 
-
+                        #inspiration: https://forum.universal-robots.com/t/background-tcp-ip-socket-connection-and-data-transmission/29033/2
+                        #https://stackoverflow.com/questions/58980151/python-sockets-sending-utf-8-with-sockets
                         command = f"movej({angleRow}, a={acceleration}, v={velocity})\n"
                         print("Sending command: ", command)
                         print("Now sending command: ", command)

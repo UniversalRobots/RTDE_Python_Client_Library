@@ -6,7 +6,7 @@ import time
 import csv
 #Serial communication with async:
 import serial_asyncio
-from serial_asyncio import create_serial_connection  # Explicit import
+from serial_asyncio import create_serial_connection
 from arduinoRecorder_standalone.arduinoRecorder import SerialReaderProtocol
 
 

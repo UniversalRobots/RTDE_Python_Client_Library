@@ -238,7 +238,6 @@ class URIKSolver:
         return best_solution
 
     def _dh_to_tform(self, alpha, a, d, theta):
-        """Convert DH parameters to transformation matrix"""
         tform = np.eye(4)
 
         # Row 1

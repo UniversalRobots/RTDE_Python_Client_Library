@@ -24,7 +24,7 @@ idx -= robotTime - left < right - robotTime
 
 uniqueIdx = np.unique(idx)
 matchedTeensy = arduinoDf.iloc[uniqueIdx].reset_index(drop=True)
-matched_robot = robotDf.reset_index(drop=True)
+matchedRobot = robotDf.reset_index(drop=True)
 
 
 matchedTeensy.to_csv("calibratedAlignedDatasets/calibrated06__05__2025.csv", index=False)
