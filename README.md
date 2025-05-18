@@ -1,6 +1,6 @@
 # RTDE Client Library for the MagLev Project
 
-This repository is a customized fork of the [Universal Robots RTDE Python Client Library](https://github.com/UniversalRobots/RTDE_Python_Client_Library), adapted for synchronized recording of UR robot and Teensy 4.1 microcontroller data on the MagLev 2.6 platform.
+This repository is a customized fork of the public [Universal Robots RTDE Python Client Library](https://github.com/UniversalRobots/RTDE_Python_Client_Library), adapted for synchronized recording of UR robot and Teensy 4.1 microcontroller data on the MagLev 2.6 platform.
 
 The collected datasets are then used to find the relationship between hall effect sensor data and the robot's position.
 
