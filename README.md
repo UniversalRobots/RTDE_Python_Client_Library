@@ -4,7 +4,7 @@ This repository is a customized fork of the [Universal Robots RTDE Python Client
 
 The collected datasets are then used to find the relationship between hall effect sensor data and the robot's position.
 
-Developed as part of a bachelor project by Hans Kristian Urdahl and Simon Johannes Jensen.
+Developed as part of a bachelor project for the Automation and Intelligent systems at NTNU in Ålesund.
 
 The MagLev (Maggy) 2.6 platform features four solenoids/coils as actuators and three hall effect sensors (S0, S1, S2). one sensor are placed in the middle, one under the left solenoid, and one is under the right solenoid. The setup is shown below:
 
