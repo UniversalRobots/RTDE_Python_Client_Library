@@ -109,5 +109,10 @@ The MagLev (Maggy) 2.6 platform features four solenoids/coils as actuators and t
 
 
 ---
-## GitHub project link (if public and available):
-https://github.com/hanurd25/RTDEPythonClientLibraryMagLev
+## GitHub Project Link (if public and available)
+
+[https://github.com/hanurd25/RTDEPythonClientLibraryMagLev](https://github.com/hanurd25/RTDEPythonClientLibraryMagLev)
+
+> **Note:** GitHub does not allow forks of public repositories to be made private, so this repository is currently public.
+
+> Might hide names of students, from `README.md`, for personal safety.
