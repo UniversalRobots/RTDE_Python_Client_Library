@@ -62,16 +62,20 @@ The MagLev (Maggy) 2.6 platform features four solenoids/coils as actuators and t
 - **Data Analysis** (`csvAnalysis/`)
   - Scripts for normalizing and analyzing position, orientation, and hall effect sensor data.
 
-- **Neural Network Construction** (`filePrepping/Neural.py`)
-  - PyTorch-based neural network training and evaluation.
-  - Supports exporting trained models to ONNX format for C++ and CUDA inference.
-  - Includes visualization tools for evaluation, such as mean squared error plots and heatmaps for assessing neural network performance based on magnet position.
 
 - **Data Interpolation** (`filePrepping/interpolation2.py`, `filePrepping/interpolation1.py`)
   - Aligns datasets with differing sample rates using nearest-neighbor and timestamp matching.
 
 - **Angle Normalization** (`filePrepping/dataCalibration.py`)
   - Handles angle wrapping and normalization for UR robot end effector data.
+
+
+- **Neural Network Construction** (`filePrepping/Neural.py`)
+  - PyTorch-based neural network training and evaluation.
+  - Supports exporting trained models to ONNX format for C++ and CUDA inference.
+  - Includes visualization tools for evaluation, such as mean squared error plots and heatmaps for assessing neural network performance based on magnet position.
+
+
 
 ---
 
