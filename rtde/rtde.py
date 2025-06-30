@@ -83,6 +83,7 @@ class RTDE(object):
         self.__input_config = {}
         self.__skipped_package_count = 0
         self.__protocolVersion = RTDE_PROTOCOL_VERSION_1
+        self.__warning_counter = {}
 
     def connect(self):
         if self.__sock:
@@ -206,9 +207,9 @@ class RTDE(object):
         return self.__sendall(Command.RTDE_DATA_PACKAGE, config.pack(input_data))
 
     def receive(self, binary=False):
-        """Recieve the latest data package.
-        If muliple packages has been received, older ones are discarded
-        and only the newest one will be returned. Will block untill a package
+        """Receive the latest data package.
+        If multiple packages has been received, older ones are discarded
+        and only the newest one will be returned. Will block until a package
         is received or the connection is lost
         """
         if self.__output_config is None:
@@ -218,8 +219,8 @@ class RTDE(object):
         return self.__recv(Command.RTDE_DATA_PACKAGE, binary)
 
     def receive_buffered(self, binary=False, buffer_limit=None):
-        """Recieve the next data package.
-        If muliple packages has been received they are buffered and will
+        """Receive the next data package.
+        If multiple packages has been received they are buffered and will
         be returned on subsequent calls to this function.
         Returns None if no data is available.
         """
@@ -301,6 +302,9 @@ class RTDE(object):
         return len(readable) != 0
 
     def __recv(self, command, binary=False):
+
+        previous_skipped_package_count = self.__skipped_package_count
+
         while self.is_connected():
             try:
                 self.__recv_to_buffer(DEFAULT_TIMEOUT)
@@ -321,16 +325,44 @@ class RTDE(object):
                     if len(self.__buf) >= 3 and command == Command.RTDE_DATA_PACKAGE:
                         next_packet_header = serialize.ControlHeader.unpack(self.__buf)
                         if next_packet_header.command == command:
-                            _log.debug("skipping package(1)")
                             self.__skipped_package_count += 1
                             continue
                     if packet_header.command == command:
+                        if (
+                            self.__skipped_package_count
+                            > previous_skipped_package_count
+                        ):
+                            _log.debug(
+                                "Total number of skipped packages increased to {}".format(
+                                    self.__skipped_package_count
+                                )
+                            )
+
+                        if self.__warning_counter:
+                            for warn in self.__warning_counter:
+                                _log.debug(
+                                    "A total of {} packets with command {} received, before expected command.".format(
+                                        self.__warning_counter[warn], warn
+                                    )
+                                )
+                            self.__warning_counter.clear()
+
                         if binary:
                             return packet[1:]
 
                         return data
                     else:
-                        _log.debug("skipping package(2)")
+                        if not packet_header.command in self.__warning_counter:
+                            _log.debug(
+                                "Packet with command {} doesn't match the expected command {}. It will be skipped.".format(
+                                    packet_header.command, command
+                                )
+                            )
+                            self.__warning_counter[packet_header.command] = 1
+                        else:
+                            self.__warning_counter[packet_header.command] = (
+                                self.__warning_counter[packet_header.command] + 1
+                            )
                 else:
                     break
         raise RTDEException(" _recv() Connection lost ")

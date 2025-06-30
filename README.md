@@ -1,7 +1,7 @@
 # RTDE client library - Python
 Library implements API for Universal Robots RTDE realtime interface.
 
-Full RTDE description is available on [Universal Robots support site](https://www.universal-robots.com/support/)
+Full RTDE description is available on [Universal Robots documentation site](https://docs.universal-robots.com/tutorials/communication-protocol-tutorials/rtde-guide.html)
 # Project structure
 ## rtde
 RTDE core library
@@ -22,18 +22,24 @@ Copy rtde_control_loop.urp to the robot. Start python script before starting pro
 - example_plotting.py - example for using csv_reader, and plotting selected data.
 
 ### Running examples
-It's recommended to run examples in [virtual environment](https://docs.python.org/3/library/venv.html).
-Some require additional libraries.
-```
+It's recommended to run examples in [virtual environment](https://docs.python.org/3/library/venv.html) or [devcontainer](#using-devcontainer).
+```bash
+# Example for recording realtime data from the robot
+# NOTE: RTDE interface has to be enabled in the robot security settings
+cd examples
 python record.py -h
 python record.py --host 192.168.0.1 --frequency 10
 ```
-# Using robot simulator in Docker
-RTDE can connect from host system to controller running in Docker
+# Using robot simulator in a Docker
+RTDE can connect from host system or [devcontainer](#using-devcontainer) to controller running in a Docker
 when RTDE port 30004 is forwarded.
-1. Get latest ursim docker image: docker pull universalrobots/ursim_e-series
-2. Run docker container: docker run --rm -dit -p 30004:30004 -p 5900:5900 -p 6080:6080 universalrobots/ursim_e-series
-3. open vnc client in browser, and confirm safet: http://localhost:6080/vnc.html?host=docker_ip&port=6080
+```bash
+# 1. Get latest ursim docker image
+docker pull universalrobots/ursim_e-series
+# 2. Run docker container: 
+docker run --rm -dit -p 30004:30004 -p 5900:5900 -p 6080:6080 universalrobots/ursim_e-series
+# 3. open vnc client in browser, and confirm safety: http://localhost:6080/vnc.html?host=docker_ip&port=6080
+```
 
 More information about ursim docker image is available on [Dockerhub](https://hub.docker.com/r/universalrobots/ursim_e-series)
 
@@ -49,24 +55,29 @@ when RTDE port 30004 is forwarded.
 Leave host, and guest IP fields blank.
 
 # Using rtde library
-Copy rtde folder python project
+Copy rtde folder to python project or install with 
+```bash 
+pip install .
+# or use pre-built package from github
+pip install ./rtde-<version>-release.zip
+pip install https://github.com/UniversalRobots/RTDE_Python_Client_Library/releases/download/[version]/rtde-[version]-release.zip
+```
+
 Library is compatible with Python 2.7+, and Python 3.6+
 
 # Build release package
-```
+```bash
 mvn package
 ```
-## Using with virtual environment
+## Using pre-built package with virtual environment
 Create virtual environment, and install wheel package
 
 ### Linux & MacOS
-```
+```bash
 python -m venv venv
 source venv/bin/activate
 pip install wheel
-```
-Install rtde package
-```
+# Install pre-built rtde package
 pip install target/rtde-<version>-release.zip
 ```
 
@@ -74,18 +85,34 @@ pip install target/rtde-<version>-release.zip
 If Python3 is not installed, then just run python3 from powershell. Microsoft store will launch the installation.
 
 Permission to run scripts in console is needed to activate virtual envrionment.
-```
+```PowerShell
 set-executionpolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
 python -m venv venv
 venv/Scripts/Activate.ps1
 pip install wheel
-```
-Install rtde package
-```
+# Install pre-built rtde package
 pip install target/rtde-<version>-release.zip
+```
+
+## Using devcontainer
+Open project in VSCode and select to "reopen in devcontainer".
+Execute build command from terminal
+
+Running record.py against simulator:
+```bash
+# first start simulator exposing RTDE port 30004
+# docker run --rm -dit -p 30004:30004 -p 5900:5900 -p 6080:6080 universalrobots/ursim_e-series
+
+# in devcontainer terminal type
+cd examples
+./record.py --host controller --frequency 10 --verbose
 ```
 
 # Contributor guidelines
 Code is formatted with [black](https://github.com/psf/black).
 Run code formatter before submitting pull request.
 
+```bash
+# open project in devcontainer
+python -m black .
+```
