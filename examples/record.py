@@ -56,11 +56,6 @@ parser.add_argument(
 )
 parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
 parser.add_argument(
-    "--buffered",
-    help="Use buffered receive which doesn't skip data",
-    action="store_true",
-)
-parser.add_argument(
     "--binary", help="save the data in binary format", action="store_true"
 )
 args = parser.parse_args()
@@ -114,10 +109,7 @@ with open(args.output, writeModes) as csvfile:
         if args.samples > 0 and i >= args.samples:
             keep_running = False
         try:
-            if args.buffered:
-                state = con.receive_buffered(args.binary)
-            else:
-                state = con.receive(args.binary)
+            state = con.receive_buffered(args.binary)
             if state is not None:
                 writer.writerow(state)
                 i += 1

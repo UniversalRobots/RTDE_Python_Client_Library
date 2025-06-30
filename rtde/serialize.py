@@ -22,6 +22,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import struct
+import sys
 
 
 class ControlHeader(object):
@@ -167,8 +168,13 @@ class DataConfig(object):
     @staticmethod
     def unpack_recipe(buf):
         rmd = DataConfig()
-        rmd.id = struct.unpack_from(">B", buf)[0]
-        rmd.types = buf.decode("utf-8")[1:].split(",")
+        python_version = sys.version_info
+        if python_version.major == 2:
+            rmd.id = struct.unpack_from(">B", buf)[0]
+            rmd.types = buf.decode("utf-8")[1:].split(",")
+        else:
+            rmd.id = buf[0]
+            rmd.types = buf[1:].decode("utf-8").split(",")
         rmd.fmt = ">B"
         for i in rmd.types:
             if i == "INT32":
