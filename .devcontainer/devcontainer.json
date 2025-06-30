@@ -1,0 +1,23 @@
+{
+    "name": "Python 3 & Maven Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USER_UID": "${localEnv:UID:1000}",
+            "USER_GID": "${localEnv:GID:1000}"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ],
+            "settings": {
+                "python.formatting.provider": "black"
+            }
+        }
+    },
+    "runArgs": [
+        "--add-host=controller:host-gateway"
+    ]
+}
