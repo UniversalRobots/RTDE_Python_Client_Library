@@ -39,18 +39,19 @@ _log = logging.getLogger(LOGNAME)
 
 
 class Command:
-    RTDE_REQUEST_PROTOCOL_VERSION = ord('V')  # V=86
-    RTDE_GET_URCONTROL_VERSION = ord('v')  # v=118
-    RTDE_TEXT_MESSAGE = ord('M')  # M=77
-    RTDE_DATA_PACKAGE = ord('U')  # U=85
-    RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS = ord('O')  # O=79
-    RTDE_CONTROL_PACKAGE_SETUP_INPUTS = ord('I')  # I=73
-    RTDE_CONTROL_PACKAGE_START = ord('S')  # S=83
-    RTDE_CONTROL_PACKAGE_PAUSE = ord('P')  # P=80
+    RTDE_REQUEST_PROTOCOL_VERSION = ord("V")  # V=86
+    RTDE_GET_URCONTROL_VERSION = ord("v")  # v=118
+    RTDE_TEXT_MESSAGE = ord("M")  # M=77
+    RTDE_DATA_PACKAGE = ord("U")  # U=85
+    RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS = ord("O")  # O=79
+    RTDE_CONTROL_PACKAGE_SETUP_INPUTS = ord("I")  # I=73
+    RTDE_CONTROL_PACKAGE_START = ord("S")  # S=83
+    RTDE_CONTROL_PACKAGE_PAUSE = ord("P")  # P=80
 
 
-RTDE_PROTOCOL_VERSION_1 = 1
-RTDE_PROTOCOL_VERSION_2 = 2
+class Protocol:
+    VERSION_1 = 1
+    VERSION_2 = 2
 
 
 class ConnectionState:
@@ -82,7 +83,7 @@ class RTDE(object):
         self.__output_config = None
         self.__input_config = {}
         self.__skipped_package_count = 0
-        self.__protocolVersion = RTDE_PROTOCOL_VERSION_1
+        self.__protocolVersion = Protocol.VERSION_1
         self.__warning_counter = {}
 
     def connect(self):
@@ -137,10 +138,10 @@ class RTDE(object):
 
     def negotiate_protocol_version(self):
         cmd = Command.RTDE_REQUEST_PROTOCOL_VERSION
-        payload = struct.pack(">H", RTDE_PROTOCOL_VERSION_2)
+        payload = struct.pack(">H", Protocol.VERSION_2)
         success = self.__sendAndReceive(cmd, payload)
         if success:
-            self.__protocolVersion = RTDE_PROTOCOL_VERSION_2
+            self.__protocolVersion = Protocol.VERSION_2
         return success
 
     def send_input_setup(self, variables, types=[]):
@@ -434,7 +435,7 @@ class RTDE(object):
         if len(payload) < 1:
             _log.error("RTDE_TEXT_MESSAGE: No payload")
             return None
-        if self.__protocolVersion == RTDE_PROTOCOL_VERSION_1:
+        if self.__protocolVersion == Protocol.VERSION_1:
             msg = serialize.MessageV1.unpack(payload)
         else:
             msg = serialize.Message.unpack(payload)
