@@ -55,15 +55,21 @@ when RTDE port 30004 is forwarded.
 Leave host, and guest IP fields blank.
 
 # Using rtde library
-Copy rtde folder to python project or install with 
-```bash 
-pip install .
-# or use pre-built package from github
-pip install ./rtde-<version>-release.zip
-pip install https://github.com/UniversalRobots/RTDE_Python_Client_Library/releases/download/[version]/rtde-[version]-release.zip
+Importing locally into project and install
+```bash
+git clone https://github.com/UniversalRobots/RTDE_Python_Client_Library
+pip install RTDE_Python_Client_Library
+```
+Install latest github commit
+```bash
+pip install git+https://github.com/UniversalRobots/RTDE_Python_Client_Library.git@main
+```
+Use [pre-built package](https://github.com/UniversalRobots/RTDE_Python_Client_Library/releases) from github
+```bash
+pip install git+https://github.com/UniversalRobots/RTDE_Python_Client_Library.git@<version-tag> # vX.X.X
 ```
 
-Library is compatible with Python 2.7+, and Python 3.6+
+Library is compatible with Python 2.7+ and Python 3.6+
 
 # Build release package
 ```bash
