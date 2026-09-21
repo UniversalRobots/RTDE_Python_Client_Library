@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Plot recorded RTDE CSV data (positions, velocities, currents, etc.).
 # Copyright (c) 2016-2022, Universal Robots A/S,
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without

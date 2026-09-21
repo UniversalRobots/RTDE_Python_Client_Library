@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-# Copyright (c) 2020-2022, Universal Robots A/S,
+# Record selected RTDE output channels to a CSV file.
+# Usage Example: python record.py --host 192.168.1.100 --samples 1000 --frequency 20 --protocol-version 3 --config record_configuration_v3.xml --output robot_data.csv --verbose
+#
+# Copyright (c) 2020-2026, Universal Robots A/S,
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -45,9 +48,16 @@ parser.add_argument(
     "--frequency", type=int, default=125, help="the sampling frequency in Herz"
 )
 parser.add_argument(
+    "--protocol-version",
+    type=int,
+    default=2,
+    choices=[2, 3],
+    help="RTDE protocol version to negotiate (default: 2)",
+)
+parser.add_argument(
     "--config",
-    default="record_configuration.xml",
-    help="data configuration file to use (record_configuration.xml)",
+    default=None,
+    help="data configuration file to use (default: record_configuration_v2.xml or v3 based on --protocol-version)",
 )
 parser.add_argument(
     "--output",
@@ -63,11 +73,20 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(level=logging.INFO)
 
-conf = rtde_config.ConfigFile(args.config)
+config_file = args.config
+if config_file is None:
+    config_file = "record_configuration_v{}.xml".format(args.protocol_version)
+
+conf = rtde_config.ConfigFile(config_file)
 output_names, output_types = conf.get_recipe("out")
 
 con = rtde.RTDE(args.host, args.port)
 con.connect()
+
+if args.protocol_version == 3:
+    if not con.negotiate_protocol_version(rtde.RTDE_PROTOCOL_VERSION_3):
+        logging.error("Failed to negotiate protocol version 3")
+        sys.exit(1)
 
 # get controller version
 con.get_controller_version()

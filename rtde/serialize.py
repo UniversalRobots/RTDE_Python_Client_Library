@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022, Universal Robots A/S,
+# Copyright (c) 2016-2026, Universal Robots A/S,
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -23,6 +23,25 @@
 
 import struct
 import sys
+
+# Maps wire type name -> (struct format char, item count per field).
+WIRE_TYPE_FORMAT = {
+    "BOOL": ("?", 1),
+    "UINT8": ("B", 1),
+    "INT32": ("i", 1),
+    "UINT32": ("I", 1),
+    "UINT64": ("Q", 1),
+    "DOUBLE": ("d", 1),
+    "VECTOR3D": ("d", 3),
+    "VECTOR6D": ("d", 6),
+    "VECTOR6INT32": ("i", 6),
+    "VECTOR6UINT32": ("I", 6),
+}
+
+
+def get_wire_type_format(wire_type):
+    """Return (struct_char, item_count) for a wire type string, or None."""
+    return WIRE_TYPE_FORMAT.get(wire_type)
 
 
 class ControlHeader(object):
@@ -97,24 +116,23 @@ class Message(object):
 
 
 def get_item_size(data_type):
-    if data_type.startswith("VECTOR6"):
-        return 6
-    elif data_type.startswith("VECTOR3"):
-        return 3
+    wire_type_format = get_wire_type_format(data_type)
+    if wire_type_format is not None:
+        return wire_type_format[1]
     return 1
 
 
 def unpack_field(data, offset, data_type):
     size = get_item_size(data_type)
-    if data_type == "VECTOR6D" or data_type == "VECTOR3D":
+    if data_type in ("VECTOR6D", "VECTOR3D"):
         return [float(data[offset + i]) for i in range(size)]
-    elif data_type == "VECTOR6UINT32":
+    elif data_type in ("VECTOR6UINT32"):
         return [int(data[offset + i]) for i in range(size)]
     elif data_type == "DOUBLE":
         return float(data[offset])
     elif data_type == "UINT32" or data_type == "UINT64":
         return int(data[offset])
-    elif data_type == "VECTOR6INT32":
+    elif data_type in ("VECTOR6INT32"):
         return [int(data[offset + i]) for i in range(size)]
     elif data_type == "INT32" or data_type == "UINT8":
         return int(data[offset])
@@ -177,30 +195,13 @@ class DataConfig(object):
             rmd.types = buf[1:].decode("utf-8").split(",")
         rmd.fmt = ">B"
         for i in rmd.types:
-            if i == "INT32":
-                rmd.fmt += "i"
-            elif i == "UINT32":
-                rmd.fmt += "I"
-            elif i == "VECTOR6D":
-                rmd.fmt += "d" * 6
-            elif i == "VECTOR3D":
-                rmd.fmt += "d" * 3
-            elif i == "VECTOR6INT32":
-                rmd.fmt += "i" * 6
-            elif i == "VECTOR6UINT32":
-                rmd.fmt += "I" * 6
-            elif i == "DOUBLE":
-                rmd.fmt += "d"
-            elif i == "UINT64":
-                rmd.fmt += "Q"
-            elif i == "UINT8":
-                rmd.fmt += "B"
-            elif i == "BOOL":
-                rmd.fmt += "?"
-            elif i == "IN_USE":
+            if i == "IN_USE":
                 raise ValueError("An input parameter is already in use.")
-            else:
+            wt = get_wire_type_format(i)
+            if wt is None:
                 raise ValueError("Unknown data type: " + i)
+            fmt_char, count = wt
+            rmd.fmt += fmt_char * count
         return rmd
 
     def pack(self, state):

@@ -23,3 +23,4 @@
 
 from .rtde import *
 from .rtde_config import *
+from .rtde_decode import *

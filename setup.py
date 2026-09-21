@@ -26,6 +26,6 @@ from setuptools import setup
 setup(
     name="UrRtde",
     packages=["rtde"],
-    version="2.7.12",
+    version="2.8.4",
     description="Real-Time Data Exchange (RTDE) python client + examples",
 )
