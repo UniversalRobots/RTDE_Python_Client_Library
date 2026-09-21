@@ -60,9 +60,7 @@ except rtde.RTDEException as e:
     sys.exit(1)
 
 # Semantic decode of known properties
-sv = rtde_decode.decode_property(
-    "v1.software.version", props["v1.software.version"]
-)
+sv = rtde_decode.decode_property("v1.software.version", props["v1.software.version"])
 cb = rtde_decode.decode_property("v1.control_box.type", props["v1.control_box.type"])
 tf = rtde_decode.decode_property(
     "v1.robot_arm.tool_flange.type", props["v1.robot_arm.tool_flange.type"]

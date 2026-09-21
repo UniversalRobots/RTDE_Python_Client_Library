@@ -91,9 +91,7 @@ class RTDEPropertyReadError(RTDEException):
 
     def __init__(self, tokens):
         self.tokens = tokens
-        msg = "; ".join(
-            "{}: {}".format(name, token) for name, token in tokens.items()
-        )
+        msg = "; ".join("{}: {}".format(name, token) for name, token in tokens.items())
         super(RTDEPropertyReadError, self).__init__(msg)
 
 

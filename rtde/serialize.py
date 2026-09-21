@@ -53,7 +53,7 @@ class ControlHeader(object):
     @staticmethod
     def unpack(buf):
         rmd = ControlHeader()
-        (rmd.size, rmd.command) = struct.unpack_from(">HB", buf)
+        rmd.size, rmd.command = struct.unpack_from(">HB", buf)
         return rmd
 
 
@@ -63,7 +63,7 @@ class ControlVersion(object):
     @staticmethod
     def unpack(buf):
         rmd = ControlVersion()
-        (rmd.major, rmd.minor, rmd.bugfix, rmd.build) = struct.unpack_from(">IIII", buf)
+        rmd.major, rmd.minor, rmd.bugfix, rmd.build = struct.unpack_from(">IIII", buf)
         return rmd
 
 
