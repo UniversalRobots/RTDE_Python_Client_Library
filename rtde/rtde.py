@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2022, Universal Robots A/S,
+# Copyright (c) 2020-2026, Universal Robots A/S,
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -47,11 +47,18 @@ class Command:
     RTDE_CONTROL_PACKAGE_SETUP_INPUTS = ord("I")  # I=73
     RTDE_CONTROL_PACKAGE_START = ord("S")  # S=83
     RTDE_CONTROL_PACKAGE_PAUSE = ord("P")  # P=80
+    RTDE_READ_PROPERTIES = ord("R")  # R=82
 
 
 class Protocol:
     VERSION_1 = 1
     VERSION_2 = 2
+    VERSION_3 = 3
+
+
+RTDE_PROTOCOL_VERSION_1 = Protocol.VERSION_1
+RTDE_PROTOCOL_VERSION_2 = Protocol.VERSION_2
+RTDE_PROTOCOL_VERSION_3 = Protocol.VERSION_3
 
 
 class ConnectionState:
@@ -72,6 +79,20 @@ class RTDEException(Exception):
 class RTDETimeoutException(RTDEException):
     def __init__(self, msg):
         super(RTDETimeoutException, self).__init__(msg)
+
+
+class RTDEPropertyReadError(RTDEException):
+    """Raised when one or more requested RTDE properties failed to read.
+
+    Attributes:
+        tokens: dict mapping each failed property name to its failure
+                token (``"NOT_FOUND"`` or ``"NOT_SET"``).
+    """
+
+    def __init__(self, tokens):
+        self.tokens = tokens
+        msg = "; ".join("{}: {}".format(name, token) for name, token in tokens.items())
+        super(RTDEPropertyReadError, self).__init__(msg)
 
 
 class RTDE(object):
@@ -136,12 +157,80 @@ class RTDE(object):
             return version.major, version.minor, version.bugfix, version.build
         return None, None, None, None
 
-    def negotiate_protocol_version(self):
+    def read_properties(self, names):
+        """Read named properties from the controller.
+
+        Unpacks the RTDE_READ_PROPERTIES reply into wire values. The reply
+        carries a comma-separated type list (or ``NOT_FOUND`` / ``NOT_SET``
+        tokens) followed by packed values. Semantic decoding of known
+        properties is done separately with :func:`rtde.rtde_decode.decode_property`.
+
+        Args:
+            names: list of property name strings
+                   (e.g. ``["v1.software.version", "v1.control_box.type"]``).
+
+        Returns:
+            dict mapping each property name to its unpacked wire value
+            (scalar for single-item types, list for VECTOR* types).
+
+        Raises:
+            RTDEPropertyReadError: if any property returned ``NOT_FOUND``
+                or ``NOT_SET`` (no values are parsed in that case).
+            RTDEException: on protocol or connection errors.
+        """
+        cmd = Command.RTDE_READ_PROPERTIES
+        payload = bytearray(",".join(names), "utf-8")
+        result = self.__sendAndReceive(cmd, payload)
+        if result is None:
+            raise RTDEException(
+                "RTDE_READ_PROPERTIES: no response or invalid property package"
+            )
+        types, values_data = result
+
+        if len(types) != len(names):
+            raise RTDEException(
+                "RTDE_READ_PROPERTIES: expected {} types, got {}".format(
+                    len(names), len(types)
+                )
+            )
+
+        error_tokens = {}
+        fmt = ">"
+        for i, token in enumerate(types):
+            wt = serialize.get_wire_type_format(token)
+            if wt is None:
+                error_tokens[names[i]] = token
+            else:
+                fmt_char, count = wt
+                fmt += fmt_char * count
+        if error_tokens:
+            raise RTDEPropertyReadError(error_tokens)
+
+        expected = struct.calcsize(fmt)
+        if len(values_data) != expected:
+            raise RTDEException(
+                "RTDE_READ_PROPERTIES: values payload size mismatch "
+                "(expected {} bytes, got {})".format(expected, len(values_data))
+            )
+
+        values = struct.unpack_from(fmt, values_data)
+        props = {}
+        vi = 0
+        for i, wire_type in enumerate(types):
+            size = serialize.get_item_size(wire_type)
+            if size == 1:
+                props[names[i]] = values[vi]
+            else:
+                props[names[i]] = list(values[vi : vi + size])
+            vi += size
+        return props
+
+    def negotiate_protocol_version(self, version=Protocol.VERSION_2):
         cmd = Command.RTDE_REQUEST_PROTOCOL_VERSION
-        payload = struct.pack(">H", Protocol.VERSION_2)
+        payload = struct.pack(">H", version)
         success = self.__sendAndReceive(cmd, payload)
         if success:
-            self.__protocolVersion = Protocol.VERSION_2
+            self.__protocolVersion = version
         return success
 
     def send_input_setup(self, variables, types=[]):
@@ -271,6 +360,8 @@ class RTDE(object):
             return self.__unpack_pause_package(payload)
         elif cmd == Command.RTDE_DATA_PACKAGE:
             return self.__unpack_data_package(payload, self.__output_config)
+        elif cmd == Command.RTDE_READ_PROPERTIES:
+            return self.__unpack_read_properties_package(payload)
         else:
             _log.error("Unknown package command: " + str(cmd))
 
@@ -484,6 +575,30 @@ class RTDE(object):
             return None
         output = output_config.unpack(payload)
         return output
+
+    def __unpack_read_properties_package(self, payload):
+        """Split an RTDE_READ_PROPERTIES payload into type tokens and value bytes.
+
+        Layout: uint16 types_length, UTF-8 types string of that length
+        (comma-separated wire types or error tokens), then packed values.
+        """
+        if len(payload) < 2:
+            _log.error("RTDE_READ_PROPERTIES: Payload too short")
+            return None
+        (types_length,) = struct.unpack_from(">H", payload)
+        types_end = 2 + types_length
+        if len(payload) < types_end:
+            _log.error(
+                "RTDE_READ_PROPERTIES: Payload shorter than declared types length "
+                "(expected at least {} bytes, got {} bytes)".format(
+                    types_end, len(payload)
+                )
+            )
+            return None
+        types_str = payload[2:types_end].decode("utf-8")
+        types = types_str.split(",")
+        values_data = payload[types_end:]
+        return types, values_data
 
     def __list_equals(self, l1, l2):
         if len(l1) != len(l2):
