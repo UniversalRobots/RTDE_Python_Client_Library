@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Plot a recorded CSV channel (target_q_1) using csv_reader.
+# Plot a recorded RTDE channel (target_q_1) using csv_reader.
 #
 # Copyright (c) 2016-2026, Universal Robots A/S,
 # All rights reserved.
