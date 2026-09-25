@@ -126,13 +126,13 @@ def unpack_field(data, offset, data_type):
     size = get_item_size(data_type)
     if data_type in ("VECTOR6D", "VECTOR3D"):
         return [float(data[offset + i]) for i in range(size)]
-    elif data_type in ("VECTOR6UINT32"):
+    elif data_type == "VECTOR6UINT32":
         return [int(data[offset + i]) for i in range(size)]
     elif data_type == "DOUBLE":
         return float(data[offset])
     elif data_type == "UINT32" or data_type == "UINT64":
         return int(data[offset])
-    elif data_type in ("VECTOR6INT32"):
+    elif data_type == "VECTOR6INT32":
         return [int(data[offset + i]) for i in range(size)]
     elif data_type == "INT32" or data_type == "UINT8":
         return int(data[offset])
