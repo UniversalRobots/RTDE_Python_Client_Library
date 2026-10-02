@@ -33,7 +33,7 @@
 		<field name="actual_digital_output_bits" type="UINT64"/>
 		<field name="runtime_state" type="UINT32"/>
 		<field name="joint_position_deviation_ratio" type="DOUBLE"/>
-<!--
+
 		<field name="payload" type="DOUBLE"/>
 		<field name="payload_cog" type="VECTOR3D"/>
 		<field name="payload_inertia" type="VECTOR6D"/>
@@ -49,6 +49,7 @@
 		<field name="tool_mode" type="UINT32"/>
 		<field name="tcp_force_scalar" type="DOUBLE"/>
 		<field name="tcp_offset" type="VECTOR6D"/>
+		<field name="dexterity" type="DOUBLE"/>
 
 		<field name="analog_io_types" type="UINT32"/>
 		<field name="standard_analog_input0" type="DOUBLE"/>
@@ -59,7 +60,9 @@
 		<field name="tool_analog_input0" type="DOUBLE"/>
 		<field name="tool_analog_input1" type="DOUBLE"/>
 		<field name="tool_output_voltage" type="INT32"/>
+		<field name="tool_output_voltage_2" type="INT32"/>
 		<field name="tool_output_current" type="DOUBLE"/>
+		<field name="tool_output_current_2" type="DOUBLE"/>
 		<field name="tool_temperature" type="DOUBLE"/>
 		<field name="tool_output_mode" type="UINT8"/>
 		<field name="tool_digital_output0_mode" type="UINT8"/>
@@ -405,21 +408,21 @@
 		<field name="input_double_register_45" type="DOUBLE"/>
 		<field name="input_double_register_46" type="DOUBLE"/>
 		<field name="input_double_register_47" type="DOUBLE"/>
-	-->
+	
 	</recipe>
-	<!--
+	
 	<recipe key="in">
 		<field name="speed_slider_mask" type="UINT32"/>
 		<field name="speed_slider_fraction" type="DOUBLE"/>
 
 		<field name="standard_digital_output_mask" type="UINT8"/>
-		<field name="configurable_digital_output_mask" type="UINT8"/>
+		<field name="configurable_digital_output_mask" type="UINT32"/>
 		<field name="tool_digital_output_mask" type="UINT8"/>
 		<field name="standard_digital_output" type="UINT8"/>
-		<field name="configurable_digital_output" type="UINT8"/>
+		<field name="configurable_digital_output" type="UINT32"/>
 		<field name="tool_digital_output" type="UINT8"/>
 
-		<field name="standard_analog_output_mask" type="UINT8"/>
+		<!-- <field name="standard_analog_output_mask" type="UINT8"/>
 		<field name="standard_analog_output_type" type="UINT8"/>
 		<field name="standard_analog_output_0" type="DOUBLE"/>
 		<field name="standard_analog_output_1" type="DOUBLE"/>
@@ -586,7 +589,7 @@
 		<field name="input_double_register_45" type="DOUBLE"/>
 		<field name="input_double_register_46" type="DOUBLE"/>
 		<field name="input_double_register_47" type="DOUBLE"/>
-		<field name="external_force_torque" type="VECTOR6D"/>
+		<field name="external_force_torque" type="VECTOR6D"/> -->
 	</recipe>
-	-->
+	
 </rtde_config>

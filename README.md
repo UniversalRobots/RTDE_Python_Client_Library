@@ -12,6 +12,9 @@ RTDE connection management object
 - rtde_config.py:
 XML configuration files parser
 
+- rtde_decode.py:
+Decoders for named RTDE properties (software version, hardware type)
+
 - csv_writer.py, csv_reader.py: 
 read and write rtde data objects to text csv files
 
@@ -29,7 +32,9 @@ It's recommended to run examples in [virtual environment](https://docs.python.or
 cd examples
 python record.py -h
 python record.py --host 192.168.0.1 --frequency 10
+python record.py --host 192.168.0.1 --frequency 10 --protocol-version 3
 ```
+Default recording uses `record_configuration_v2.xml` or `record_configuration_v3.xml` based on `--protocol-version`.
 # Using robot simulator in a Docker
 RTDE can connect from host system or [devcontainer](#using-devcontainer) to controller running in a Docker
 when RTDE port 30004 is forwarded.

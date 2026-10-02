@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022, Universal Robots A/S,
+# Copyright (c) 2016-2026, Universal Robots A/S,
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -52,49 +52,13 @@ class CSVBinaryWriter(object):
 
     def getType(self, vtype):
         if vtype == "VECTOR3D":
-            return "DOUBLE" + self.__delimiter + "DOUBLE" + self.__delimiter + "DOUBLE"
+            return self.__delimiter.join(["DOUBLE"] * 3)
         elif vtype == "VECTOR6D":
-            return (
-                "DOUBLE"
-                + self.__delimiter
-                + "DOUBLE"
-                + self.__delimiter
-                + "DOUBLE"
-                + self.__delimiter
-                + "DOUBLE"
-                + self.__delimiter
-                + "DOUBLE"
-                + self.__delimiter
-                + "DOUBLE"
-            )
+            return self.__delimiter.join(["DOUBLE"] * 6)
         elif vtype == "VECTOR6INT32":
-            return (
-                "INT32"
-                + self.__delimiter
-                + "INT32"
-                + self.__delimiter
-                + "INT32"
-                + self.__delimiter
-                + "INT32"
-                + self.__delimiter
-                + "INT32"
-                + self.__delimiter
-                + "INT32"
-            )
+            return self.__delimiter.join(["INT32"] * 6)
         elif vtype == "VECTOR6UINT32":
-            return (
-                "UINT32"
-                + self.__delimiter
-                + "UINT32"
-                + self.__delimiter
-                + "UINT32"
-                + self.__delimiter
-                + "UINT32"
-                + self.__delimiter
-                + "UINT32"
-                + self.__delimiter
-                + "UINT32"
-            )
+            return self.__delimiter.join(["UINT32"] * 6)
         else:
             return str(vtype)
 
